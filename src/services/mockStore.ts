@@ -1,13 +1,19 @@
-import { User, ProviderProfile, ClientProfile, UserRole } from '../types';
-import { SEED_DATA } from './seedData';
+import { User, ProviderProfile, ClientProfile } from '../data/types';
+import { UserRole } from '../data/types/enums';
 import { persistence } from './persistence';
+import { loadInitialData } from '../data/utils/loader';
 
 interface MockStoreData {
   users: User[];
   providers: ProviderProfile[];
+  blogs: any[];
+  specialties: any[];
+  testimonials: any[];
   clientProfiles: ClientProfile[];
   languages: string[];
   genders: string[];
+  lastUpdated?: number;
+  isDemoMode?: boolean;
 }
 
 class MockStoreService {
@@ -18,38 +24,49 @@ class MockStoreService {
   }
 
   private initializeStore(): MockStoreData {
-    const store = persistence.loadStore();
-    
-    // Seed if empty (First run)
-    if (store.users.length === 0) {
-       console.log('🌱 Seeding initial data...');
-       store.users = [...SEED_DATA.users];
-       store.providers = [...SEED_DATA.providers];
-       
-       // Generate Client Profiles for Seed Users
-       const seedClients = SEED_DATA.users.filter(u => u.role === UserRole.CLIENT);
-       store.clientProfiles = seedClients.map(u => ({
-          id: `cp-${u.id}`,
-          userId: u.id,
-          intakeStatus: 'COMPLETED',
-          documents: [],
-          createdAt: u.createdAt,
-          updatedAt: u.updatedAt,
-          preferences: { communication: 'email', language: 'English' }
-       }));
-       
-       // Seed Metadata
-       store.languages = ['English', 'Spanish', 'Mandarin', 'French', 'German'];
-       store.genders = ['Male', 'Female', 'Non-Binary', 'Prefer not to say'];
-       
-       // Save immediately
-       persistence.saveStore(store);
+    const initialData = loadInitialData();
+    const stored = persistence.loadStore();
+
+    // If persistence has data, merge it with initial seed/mock data 
+    // but prefer persistence for stateful changes
+    const store: MockStoreData = {
+      ...initialData,
+      clientProfiles: stored.clientProfiles || [],
+      languages: stored.languages || ['English', 'Spanish', 'Mandarin', 'French', 'German'],
+      genders: stored.genders || ['Male', 'Female', 'Non-Binary', 'Prefer not to say']
+    };
+
+    // Auto-generate client profiles if missing for seed/mock clients
+    if (store.clientProfiles.length === 0) {
+      const clients = store.users.filter(u => u.role === UserRole.CLIENT);
+      store.clientProfiles = clients.map(u => ({
+        id: `cp-${u.id}`,
+        userId: u.id,
+        intakeStatus: 'COMPLETED',
+        documents: [],
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        preferences: { communication: 'email', language: 'English' }
+      }));
     }
+
     return store;
+  }
+
+  public resetData() {
+    localStorage.removeItem('evowell_mock_store');
+    this.store = this.initializeStore();
+    this.save();
+    window.location.reload();
   }
 
   public save() {
     persistence.saveStore(this.store);
+    // Also update the loader's source
+    localStorage.setItem('evowell_mock_store', JSON.stringify({
+      ...this.store,
+      lastUpdated: Date.now()
+    }));
   }
 }
 

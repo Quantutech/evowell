@@ -98,58 +98,67 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
   const handleMouseLeave = () => {
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveDropdown(null);
-    }, 200); // 200ms delay to prevent flickering
+    }, 200);
   };
 
-  // Nav Configuration with Updated Branding
+  /*
+   * ── Navigation structure ──────────────────────────────────────
+   * Ordered by user priority:
+   *   1. Find Care     — the #1 reason patients visit
+   *   2. Resources     — returning visitors, SEO content
+   *   3. About         — brand credibility
+   *   4. For Partners  — B2B (simple link)
+   *   5. For Providers — provider-side CTA
+   */
   const navItems = [
-    { 
-      label: 'About', 
+    {
+      label: 'Find Care',
+      id: 'care',
+      gradient: 'from-brand-500 to-brand-600',
+      items: [
+        { label: 'Provider Directory', href: '#/directory', icon: 'clinic', desc: 'Browse all verified providers', badge: 'New' },
+        { label: 'Search Providers', href: '#/search', icon: 'search', desc: 'Filter by specialty, location & more' },
+        { label: 'Telehealth', href: '#/search?format=REMOTE', icon: 'video', desc: 'Video & remote sessions' },
+        { label: 'In-Person', href: '#/search?format=IN_PERSON', icon: 'clinic', desc: 'Find a local office' },
+      ],
+    },
+    {
+      label: 'Resources',
+      id: 'resources',
+      gradient: 'from-blue-500 to-blue-600',
+      items: [
+        { label: 'Wellness Blog', href: '#/blog', icon: 'blog', desc: 'Articles & clinical guides' },
+        { label: 'Podcasts', href: '#/podcasts', icon: 'podcast', desc: 'Listen to expert conversations' },
+        { label: 'Tools & Downloads', href: '#/docs', icon: 'folder', desc: 'Worksheets & assessments' },
+      ],
+    },
+    {
+      label: 'About',
       id: 'about',
       gradient: 'from-slate-700 to-slate-900',
       items: [
-        { label: 'Our Story', href: '#/about', icon: 'info', desc: 'Mission & Vision' },
-        { label: 'Careers', href: '#/careers', icon: 'star', desc: 'Join the team' }
-      ]
+        { label: 'Our Story', href: '#/about', icon: 'info', desc: 'Mission, values & team' },
+        { label: 'Careers', href: '#/careers', icon: 'star', desc: 'Open positions' },
+        { label: 'Contact', href: '#/contact', icon: 'email', desc: 'Get in touch' },
+      ],
     },
-    { 
-      label: 'Find Care', 
-      id: 'care',
-      gradient: 'from-brand-500 to-brand-600', // Primary Green
-      items: [
-        { label: 'Search Providers', href: '#/search', icon: 'search', desc: 'Browse the full directory', badge: 'Popular' },
-        { label: 'Telehealth', href: '#/search?format=REMOTE', icon: 'video', desc: 'Video & remote sessions' },
-        { label: 'In-Person Care', href: '#/search?format=IN_PERSON', icon: 'clinic', desc: 'Visit local offices' },
-        { label: 'Urgent Care', href: '#/search?query=urgent', icon: 'clinic', desc: 'Immediate availability' }
-      ] 
-    },
-    { 
-      label: 'Resources', 
-      id: 'resources',
-      gradient: 'from-blue-500 to-blue-600', // Accent Blue
-      items: [
-        { label: 'Wellness Blog', href: '#/blog', icon: 'blog', desc: 'Articles & guides' },
-        { label: 'Podcasts', href: '#/podcasts', icon: 'podcast', desc: 'Listen to experts' },
-        { label: 'Docs & Tools', href: '#/docs', icon: 'folder', desc: 'Clinical resources' }
-      ] 
-    },
-    { 
-      label: 'For Partners', 
+    {
+      label: 'For Partners',
       href: '#/partners',
       icon: 'partners',
-      gradient: 'from-indigo-500 to-violet-600'
+      gradient: 'from-indigo-500 to-violet-600',
     },
-    { 
-      label: 'For Providers', 
+    {
+      label: 'For Providers',
       id: 'providers',
-      gradient: 'from-slate-800 to-black', // Dark/Premium
+      gradient: 'from-slate-800 to-black',
       items: [
-        { label: 'Join Network', href: '#/login?join=true', icon: 'userPlus', desc: 'Create provider profile' },
-        { label: 'Provider Benefits', href: '#/benefits', icon: 'star', desc: 'Why join us' },
-        { label: 'ROI Calculator', href: '#/calculator', icon: 'dollar', desc: 'Calculate potential growth' },
-        { label: 'Provider Login', href: '#/login', icon: 'lock', desc: 'Access portal' }
-      ] 
-    }
+        { label: 'Why EvoWell', href: '#/benefits', icon: 'star', desc: 'Platform benefits & pricing' },
+        { label: 'ROI Calculator', href: '#/calculator', icon: 'dollar', desc: 'Estimate your earnings' },
+        { label: 'Apply to Join', href: '#/login?join=true', icon: 'userPlus', desc: 'Create your provider profile' },
+        { label: 'Provider Login', href: '#/login', icon: 'lock', desc: 'Access your dashboard' },
+      ],
+    },
   ];
 
   const getUserActions = () => {
@@ -158,18 +167,18 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
         return [
           { label: 'My Console', href: '#/console', icon: 'dashboard' },
           { label: 'View Public Profile', href: `#/provider/${provider?.id}`, icon: 'user' },
-          { label: 'Settings', href: '#/console/settings', icon: 'settings' }
+          { label: 'Settings', href: '#/console/settings', icon: 'settings' },
         ];
       case 'CLIENT':
         return [
           { label: 'My Health Portal', href: '#/portal', icon: 'heart' },
           { label: 'Bookings', href: '#/portal/sessions', icon: 'calendar' },
-          { label: 'Settings', href: '#/portal/settings', icon: 'settings' }
+          { label: 'Settings', href: '#/portal/settings', icon: 'settings' },
         ];
       case 'ADMIN':
         return [
           { label: 'Admin Panel', href: '#/admin', icon: 'shield' },
-          { label: 'System Stats', href: '#/admin', icon: 'chart' }
+          { label: 'System Stats', href: '#/admin', icon: 'chart' },
         ];
       default:
         return [];
@@ -301,7 +310,7 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
                     <button 
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-full transition-all duration-200 text-sm font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
                         activeDropdown === item.id 
-                          ? 'bg-slate-100 text-slate-900' // Dropdown active always light background
+                          ? 'bg-slate-100 text-slate-900'
                           : `${textColorClass} ${isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-100'}`
                       }`}
                       aria-expanded={activeDropdown === item.id}
@@ -331,7 +340,7 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <p className="text-sm font-bold text-slate-900">{sub.label}</p>
-                                  {sub.badge && <span className="text-[11px] font-black bg-slate-900 text-white px-1.5 py-0.5 rounded-md">{sub.badge}</span>}
+                                  {sub.badge && <span className="text-[11px] font-black bg-brand-500 text-white px-1.5 py-0.5 rounded-md">{sub.badge}</span>}
                                 </div>
                                 <p className="text-xs text-slate-500 font-medium mt-0.5">{sub.desc}</p>
                               </div>
@@ -362,8 +371,8 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
                     href="#/login?join=true" 
                     className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
                       isDarkMode 
-                        ? 'bg-white text-slate-900 hover:bg-slate-100' // Inverse for dark mode
-                        : 'bg-slate-900 text-white hover:bg-slate-800' // Standard
+                        ? 'bg-white text-slate-900 hover:bg-slate-100'
+                        : 'bg-slate-900 text-white hover:bg-slate-800'
                     }`}
                   >
                     For Providers
@@ -439,6 +448,24 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
                 </button>
               </div>
 
+              {/* Mobile: Quick-access links at top */}
+              <div className="flex gap-2 mb-6">
+                <Link
+                  href="#/directory"
+                  className="flex-1 py-3 text-center rounded-xl bg-brand-50 text-brand-700 text-sm font-bold border border-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Directory
+                </Link>
+                <Link
+                  href="#/search"
+                  className="flex-1 py-3 text-center rounded-xl bg-slate-50 text-slate-700 text-sm font-bold border border-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Search
+                </Link>
+              </div>
+
               <div className="space-y-6">
                 {navItems.map((item) => (
                   <div key={item.label}>
@@ -457,10 +484,11 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
                               <Link 
                                 key={sub.label} 
                                 href={sub.href} 
-                                className="block text-sm font-medium text-slate-600 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-inset rounded-lg px-2"
+                                className="flex items-center justify-between text-sm font-medium text-slate-600 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-inset rounded-lg px-2"
                                 onClick={() => setMobileMenuOpen(false)}
                               >
                                 {sub.label}
+                                {sub.badge && <span className="text-[10px] font-bold bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded">{sub.badge}</span>}
                               </Link>
                             ))}
                           </div>

@@ -5,7 +5,7 @@ import { ProviderProfile, Specialty, SearchFilters, SessionFormat } from '../typ
 import Breadcrumb from '../components/Breadcrumb';
 import { PageHero, Section, Container } from '../components/layout';
 import { Heading, Text, Label } from '../components/typography';
-import { Button, Badge, Card } from '../components/ui';
+import { Button, Badge, Card, Select } from '../components/ui';
 import ProviderCard from '../components/provider/ProviderCard';
 import { useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
 
@@ -44,9 +44,62 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const hasActiveFilters = !!(filters.specialty || filters.format || filters.state || filters.language || filters.day || filters.gender || filters.maxPrice);
   const isDirectoryMode = !filters.query && !hasActiveFilters;
+
+  // ── Manual Sticky Implementation ──────────────────────────
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sidebarRef.current) return;
+      
+      const headerOffset = 100; // Height of header + spacing
+      const scrollY = window.scrollY;
+      const parent = sidebarRef.current.parentElement;
+      
+      if (!parent) return;
+
+      // Only apply if desktop
+      if (window.innerWidth < 1024) {
+        sidebarRef.current.style.transform = '';
+        return;
+      }
+      
+      // Calculate limits
+      const parentRect = parent.getBoundingClientRect();
+      const sidebarHeight = sidebarRef.current.offsetHeight;
+      const parentTop = parentRect.top + scrollY;
+      const parentHeight = parent.offsetHeight;
+      
+      // Basic sticky logic via transform
+      // We calculate how far we've scrolled past the start of the container
+      const delta = scrollY - parentTop + headerOffset;
+      
+      // Clamping:
+      // Min: 0 (don't go above start)
+      // Max: parentHeight - sidebarHeight (don't go below end)
+      const maxTranslate = Math.max(0, parentHeight - sidebarHeight);
+      const translate = Math.max(0, Math.min(delta, maxTranslate));
+      
+      if (delta > 0) {
+        sidebarRef.current.style.transform = `translateY(${translate}px)`;
+      } else {
+        sidebarRef.current.style.transform = 'translateY(0px)';
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    // Initial check
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []); 
 
   // ── Debounce search input ─────────────────────────────────
 
@@ -77,6 +130,12 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
     staleTime: 5 * 60 * 1000,
   });
 
+  // Re-run sticky logic when data changes (content height changes)
+  useEffect(() => {
+      // Trigger scroll event manually to update position
+      window.dispatchEvent(new Event('scroll'));
+  }, [data]);
+
   const rawResults = data?.pages.flatMap(p => p.providers) || [];
   const total = data?.pages[0]?.total || 0;
 
@@ -86,16 +145,16 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
     const list = [...rawResults];
     switch (sortBy) {
       case 'rating':
-        list.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+        list.sort((a, b) => (Number((b as any).rating) || 0) - (Number((a as any).rating) || 0));
         break;
       case 'name-asc':
         list.sort((a, b) => (a.firstName || a.id).localeCompare(b.firstName || b.id));
         break;
       case 'price-low':
-        list.sort((a, b) => (Number(a.sessionRate) || 0) - (Number(b.sessionRate) || 0));
+        list.sort((a, b) => (Number(a.pricing?.hourlyRate) || 0) - (Number(b.pricing?.hourlyRate) || 0));
         break;
       case 'price-high':
-        list.sort((a, b) => (Number(b.sessionRate) || 0) - (Number(a.sessionRate) || 0));
+        list.sort((a, b) => (Number(b.pricing?.hourlyRate) || 0) - (Number(a.pricing?.hourlyRate) || 0));
         break;
       default: // relevance — keep API order
         break;
@@ -178,17 +237,15 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
       </div>
 
       {/* Specialty */}
-      <div>
-        <Label className="mb-3 block text-xs">Specialty</Label>
-        <select
-          value={filters.specialty || ''}
-          onChange={e => updateFilter('specialty', e.target.value || undefined)}
-          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-brand-300 transition-colors"
-        >
-          <option value="">All Specialties</option>
-          {specialties.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-      </div>
+      <Select
+        label="Specialty"
+        value={filters.specialty || ''}
+        onChange={(val) => updateFilter('specialty', val || undefined)}
+        options={[
+          { value: '', label: 'All Specialties' },
+          ...specialties.map(s => ({ value: s.id, label: s.name }))
+        ]}
+      />
 
       {/* Price range */}
       <div>
@@ -211,65 +268,50 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
       </div>
 
       {/* Language */}
-      <div>
-        <Label className="mb-3 block text-xs">Language</Label>
-        <select
-          value={filters.language || ''}
-          onChange={e => updateFilter('language', e.target.value || undefined)}
-          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 outline-none focus:border-brand-300 transition-colors"
-        >
-          <option value="">Any Language</option>
-          {['English', 'Spanish', 'French', 'Mandarin', 'Arabic', 'Portuguese', 'Korean', 'Hindi'].map(l => (
-            <option key={l} value={l}>{l}</option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label="Language"
+        value={filters.language || ''}
+        onChange={(val) => updateFilter('language', val || undefined)}
+        options={[
+          { value: '', label: 'Any Language' },
+          ...['English', 'Spanish', 'French', 'Mandarin', 'Arabic', 'Portuguese', 'Korean', 'Hindi']
+        ]}
+      />
 
       {/* Gender preference */}
-      <div>
-        <Label className="mb-3 block text-xs">Provider Gender</Label>
-        <div className="flex gap-2">
-          {['Any', 'Male', 'Female', 'Non-binary'].map(g => (
-            <button
-              key={g}
-              onClick={() => updateFilter('gender', g === 'Any' ? undefined : g)}
-              className={`flex-1 py-2.5 text-[11px] font-bold rounded-xl border transition-all ${
-                (g === 'Any' && !filters.gender) || filters.gender === g
-                  ? 'bg-brand-50 border-brand-200 text-brand-700'
-                  : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
-              }`}
-            >
-              {g}
-            </button>
-          ))}
-        </div>
+      <div className="relative z-20">
+        <Select
+          label="Provider Gender"
+          value={filters.gender || ''}
+          onChange={(val) => updateFilter('gender', val || undefined)}
+          options={[
+            { value: '', label: 'Any Gender' },
+            ...['Male', 'Female', 'Non-binary', 'Other']
+          ]}
+        />
       </div>
 
-      {/* Availability day */}
-      <div>
-        <Label className="mb-3 block text-xs">Available On</Label>
-        <div className="flex flex-wrap gap-1.5">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-            <button
-              key={d}
-              onClick={() => updateFilter('day', filters.day === d ? undefined : d)}
-              className={`w-11 h-10 text-[11px] font-bold rounded-xl border transition-all ${
-                filters.day === d
-                  ? 'bg-brand-500 border-brand-500 text-white'
-                  : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Availability day - Temporarily disabled */}
+      {/* 
+      <Select
+        label="Available On"
+        value={filters.day || ''}
+        onChange={(val) => updateFilter('day', val || undefined)}
+        options={[
+          { value: '', label: 'Any Day' },
+          ...['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        ]}
+      /> 
+      */}
     </div>
   );
 
   return (
     <div className="bg-[#f8fafc] min-h-screen">
-      <Breadcrumb items={[{ label: 'Directory', path: '/directory' }, { label: 'Search' }]} />
+      <Breadcrumb items={[
+        { label: 'Directory', href: '#/directory' }, 
+        { label: 'Search' }
+      ]} />
 
       {/* ── Search header ────────────────────────────────────── */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-40">
@@ -298,18 +340,42 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
               )}
             </div>
 
-            {/* Sort */}
-            <select
+            {/* Uncollapsed Sort Options (Desktop) */}
+            <div className="hidden lg:flex bg-slate-50 p-1 rounded-xl border border-slate-100">
+                {[
+                    { label: 'Relevant', value: 'relevance' },
+                    { label: 'Rated', value: 'rating' },
+                    { label: 'A-Z', value: 'name-asc' },
+                    { label: '$ Low', value: 'price-low' },
+                    { label: '$ High', value: 'price-high' },
+                ].map((opt: any) => (
+                    <button
+                        key={opt.value}
+                        onClick={() => setSortBy(opt.value)}
+                        className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                            sortBy === opt.value
+                                ? 'bg-white text-brand-600 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        {opt.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Mobile Sort Dropdown */}
+            <Select
               value={sortBy}
-              onChange={e => setSortBy(e.target.value as SortOption)}
-              className="hidden sm:block bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-xs font-bold text-slate-700 outline-none cursor-pointer hover:border-slate-300"
-            >
-              <option value="relevance">Most Relevant</option>
-              <option value="rating">Highest Rated</option>
-              <option value="name-asc">Name A → Z</option>
-              <option value="price-low">Price: Low → High</option>
-              <option value="price-high">Price: High → Low</option>
-            </select>
+              onChange={(val) => setSortBy(val as SortOption)}
+              options={[
+                { value: 'relevance', label: 'Most Relevant' },
+                { value: 'rating', label: 'Highest Rated' },
+                { value: 'name-asc', label: 'Name A → Z' },
+                { value: 'price-low', label: 'Price: Low → High' },
+                { value: 'price-high', label: 'Price: High → Low' },
+              ]}
+              className="lg:hidden min-w-[160px]"
+            />
 
             {/* Mobile filter toggle */}
             <button
@@ -360,30 +426,32 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
 
       {/* ── Content ──────────────────────────────────────────── */}
       <Container className="py-8 pb-24">
-        {/* Results header */}
-        <div className="mb-6">
-          <Text variant="small" color="muted" className="font-semibold">
-            {isLoading ? 'Searching…' : `${total} provider${total !== 1 ? 's' : ''} found`}
-            {filters.query && <span> for "<span className="text-slate-700">{filters.query}</span>"</span>}
-          </Text>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 items-start relative min-h-[500px]">
+          
           {/* Desktop filter sidebar */}
-          <aside className="hidden lg:block w-72 shrink-0">
-            <Card className="sticky top-32 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <Heading level={4} className="text-sm">Filters</Heading>
-                {hasActiveFilters && (
-                  <button onClick={clearAllFilters} className="text-xs font-bold text-brand-500 hover:text-brand-700 transition-colors">Reset</button>
-                )}
-              </div>
-              <FilterPanelContent />
-            </Card>
+          <aside className="hidden lg:block w-72 shrink-0 relative">
+            <div ref={sidebarRef} className="pb-10 transition-transform duration-75 ease-linear will-change-transform">
+              <Card className="p-6 !overflow-visible">
+                <div className="flex items-center justify-between mb-6">
+                  <Heading level={4} className="text-sm">Filters</Heading>
+                  {hasActiveFilters && (
+                    <button onClick={clearAllFilters} className="text-xs font-bold text-brand-500 hover:text-brand-700 transition-colors">Reset</button>
+                  )}
+                </div>
+                <FilterPanelContent />
+              </Card>
+            </div>
           </aside>
 
           {/* Results list */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0">
+            {/* Results header */}
+            <div className="mb-6">
+              <Text variant="small" color="muted" className="font-semibold">
+                {isLoading ? 'Searching…' : `${total} provider${total !== 1 ? 's' : ''} found`}
+                {filters.query && <span> for "<span className="text-slate-700">{filters.query}</span>"</span>}
+              </Text>
+            </div>
             {isLoading ? (
               <div className="py-32 flex flex-col items-center justify-center">
                 <div className="w-12 h-12 border-4 border-brand-100 border-t-brand-500 rounded-full animate-spin mb-4" />

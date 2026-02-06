@@ -5,9 +5,10 @@ import { ProviderProfile, Specialty } from '../types';
 import Breadcrumb from '../components/Breadcrumb';
 import { PageHero, Section, Container } from '../components/layout';
 import { Heading, Text, Label } from '../components/typography';
-import { Button, Badge, Card } from '../components/ui';
+import { Button, Badge, Card, Select } from '../components/ui';
 import ProviderCard from '../components/provider/ProviderCard';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, keepPreviousData } from '@tanstack/react-query';
+import { SearchFilters, SessionFormat } from '../types';
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
@@ -18,6 +19,11 @@ interface EnrichedProvider extends ProviderProfile {
   firstName?: string;
   lastName?: string;
   sortName?: string;
+  slug?: string;
+  rating?: number | string;
+  title?: string;
+  credentials?: string;
+  createdAt?: string;
 }
 
 /* ─── Compact grid card (for grid mode) ──────────────────────────────── */
@@ -81,36 +87,54 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
 
   // ── Data fetching ─────────────────────────────────────────
 
-  const { data: allProviders = [], isLoading } = useQuery({
-    queryKey: ['allProviders'],
-    queryFn: async () => {
-      const [providers, users] = await Promise.all([api.getAllProviders(), api.getAllUsers()]);
-      return providers
-        .filter(p => p.moderationStatus === 'APPROVED' && p.isPublished)
-        .map(p => {
-          const user = users.find(u => u.id === p.userId);
-          const firstName = user?.firstName || '';
-          const lastName = user?.lastName || '';
-          return {
-            ...p,
-            firstName,
-            lastName,
-            sortName: `${lastName} ${firstName}`.trim().toLowerCase(),
-          };
-        });
+  // ── Unified Search Hook (Matches SearchView's Robustness) ─────────
+
+  const LIMIT = 20;
+  
+  const searchFilters: SearchFilters = useMemo(() => ({
+    specialty: selectedSpecialty || undefined,
+    // Add other filters as needed if Directory supports more complex filtering
+  }), [selectedSpecialty]);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ['directoryProviders', searchFilters],
+    queryFn: ({ pageParam = 0 }) => api.search({ ...searchFilters, limit: LIMIT, offset: pageParam * LIMIT }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const fetched = allPages.flatMap(p => p.providers).length;
+      return fetched < lastPage.total ? allPages.length : undefined;
     },
+    placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
   });
 
-  // ── Filtering & sorting ───────────────────────────────────
+  const rawResults = data?.pages.flatMap(p => p.providers) || [];
+  
+  // Transform results for client-side usage
+  const allProviders = useMemo(() => {
+    return rawResults.map(p => ({
+      ...p,
+      firstName: p.firstName || 'Unknown',
+      lastName: p.lastName || 'Provider',
+      sortName: `${p.lastName || 'Provider'} ${p.firstName || 'Unknown'}`.trim().toLowerCase(),
+      rating: (p as any).rating,
+      createdAt: (p as any).audit?.createdAt || (p as any).createdAt,
+      slug: (p as any).profileSlug || (p as any).slug
+    } as EnrichedProvider));
+  }, [rawResults]);
+
+  // ── Client-side Filtering & Sorting ───────────────────────
 
   const filtered = useMemo(() => {
     let list = [...allProviders];
 
-    if (selectedSpecialty) {
-      list = list.filter(p => p.specialties?.includes(selectedSpecialty));
-    }
-
+    // Client-side letter filtering
     if (selectedLetter) {
       list = list.filter(p => {
         const initial = (p.lastName || p.firstName || '').charAt(0).toUpperCase();
@@ -314,8 +338,9 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
           {/* Main content */}
           <div className="flex-1 min-w-0">
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-3">
+            <div className="sticky top-20 z-20 bg-[#f8fafc] py-2 mb-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
                 <Text variant="small" color="muted" className="font-semibold">
                   {filtered.length} provider{filtered.length !== 1 ? 's' : ''}
                   {selectedSpecialty && ` in ${topSpecialties.find(s => s.id === selectedSpecialty)?.name || 'selection'}`}
@@ -333,16 +358,19 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
 
               <div className="flex items-center gap-2">
                 {/* Sort dropdown */}
-                <select
-                  value={sortBy}
-                  onChange={e => setSortBy(e.target.value as SortOption)}
-                  className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 outline-none cursor-pointer hover:border-slate-300 transition-colors"
-                >
-                  <option value="name-asc">Name A → Z</option>
-                  <option value="name-desc">Name Z → A</option>
-                  <option value="rating">Highest Rated</option>
-                  <option value="newest">Newest First</option>
-                </select>
+                <div className="min-w-[140px]">
+                  <Select
+                    value={sortBy}
+                    onChange={(val) => setSortBy(val as SortOption)}
+                    options={[
+                      { value: 'name-asc', label: 'Name A → Z' },
+                      { value: 'name-desc', label: 'Name Z → A' },
+                      { value: 'rating', label: 'Highest Rated' },
+                      { value: 'newest', label: 'Newest First' },
+                    ]}
+                    className="bg-white" // Override bg-slate-50 if needed, but Select has hardcoded bg-slate-50.
+                  />
+                </div>
 
                 {/* View toggle */}
                 <div className="flex bg-slate-100 p-1 rounded-xl">
@@ -364,6 +392,7 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
                     </svg>
                   </button>
+                  </div>
                 </div>
               </div>
             </div>

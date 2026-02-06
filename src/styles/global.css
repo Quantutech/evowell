@@ -1,0 +1,11 @@
+/* Global CSS additions for Sticky Search Sidebar */
+
+/* Ensure grid container aligns items properly */
+.grid-cols-\[288px_1fr\] {
+  align-items: start !important;
+}
+
+/* Fix for sticky positioning in grid */
+.grid > * {
+  min-height: 0;
+}

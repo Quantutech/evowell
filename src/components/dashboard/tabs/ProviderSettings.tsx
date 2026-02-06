@@ -197,7 +197,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({
                       <select 
                         value={editForm.timezone || getUserTimezone()} 
                         onChange={(e) => updateField('timezone', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-4 text-sm font-medium text-slate-900 outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 transition-all cursor-pointer"
                       >
                         {availableTimezones.map(tz => (
                           <option key={tz} value={tz}>{tz}</option>

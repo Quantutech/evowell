@@ -8,3 +8,4 @@ export { Card, CardHeader, CardBody, CardFooter, CardTitle } from './Card';
 export type { CardProps } from './Card';
 export { Badge } from './Badge';
 export { Tag } from './Tag';
+export { Select } from './Select';

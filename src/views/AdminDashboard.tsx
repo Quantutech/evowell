@@ -24,6 +24,7 @@ import AdminApplicationsTab from '../components/dashboard/tabs/admin/AdminApplic
 import AdminContentReviewTab from '../components/dashboard/tabs/admin/AdminContentReviewTab';
 import AdminClientsTab from '../components/dashboard/tabs/admin/AdminClientsTab';
 import AdminJobsTab from '../components/dashboard/tabs/admin/AdminJobsTab';
+import { ResetDataButton } from '../components/dashboard/tabs/admin/ResetDataButton';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -285,6 +286,8 @@ const AdminDashboard: React.FC = () => {
             onDeleteGender={(id) => handleDeleteConfig('gender', id)}
         />
       )}
+
+      {activeView === 'config' && <ResetDataButton />}
 
       {/* Detail Modal for User/Provider Management */}
       {(selectedUser || selectedProvider) && (

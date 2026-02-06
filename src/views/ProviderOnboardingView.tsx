@@ -5,6 +5,7 @@ import { api } from '@/services/api';
 import { ProviderProfile, AppointmentType, Specialty, ModerationStatus } from '@/types';
 import { storageService } from '@/services/storageService';
 import ScheduleBuilder from '@/components/ScheduleBuilder';
+import { Select } from '@/components/ui';
 
 // --- Shared Constants ---
 const LANGUAGES_LIST = [
@@ -157,8 +158,7 @@ const ProviderOnboardingView: React.FC = () => {
         console.log('Uploading to bucket: provider-assets');
         const url = await storageService.uploadFile(
           file,
-          `avatars/${formData.id}/${Date.now()}_${file.name}`,
-          'provider-assets'
+          `avatars/${formData.id}/${Date.now()}_${file.name}`
         );
         updateField('imageUrl', url);
         addToast('success', 'Profile image uploaded!');
@@ -179,11 +179,11 @@ const ProviderOnboardingView: React.FC = () => {
       const newCertificates = [...formData.certificates];
 
       if (idFile) {
-        const idUrl = await storageService.uploadFile(idFile, `verification/${formData.id}/id_${Date.now()}`, 'provider-assets');
+        const idUrl = await storageService.uploadFile(idFile, `verification/${formData.id}/id_${Date.now()}`);
         newCertificates.push(`ID_DOC:${idUrl}`);
       }
       if (licenseFile) {
-        const licenseUrl = await storageService.uploadFile(licenseFile, `verification/${formData.id}/license_${Date.now()}`, 'provider-assets');
+        const licenseUrl = await storageService.uploadFile(licenseFile, `verification/${formData.id}/license_${Date.now()}`);
         newCertificates.push(`LICENSE_DOC:${licenseUrl}`);
       }
 
@@ -277,17 +277,17 @@ const ProviderOnboardingView: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</label>
-                    <select
+                    <Select
+                      label="Category"
                       value={formData.professionalCategory || ''}
-                      onChange={e => updateField('professionalCategory', e.target.value)}
-                      className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none"
-                    >
-                      <option value="">Select category</option>
-                      <option value="Mental Health Provider">Mental Health Provider</option>
-                      <option value="Wellness Coach">Wellness Coach</option>
-                      <option value="Clinical Consultant">Clinical Consultant</option>
-                    </select>
+                      onChange={(val) => updateField('professionalCategory', val)}
+                      placeholder="Select category"
+                      options={[
+                        'Mental Health Provider',
+                        'Wellness Coach',
+                        'Clinical Consultant'
+                      ]}
+                    />
                   </div>
                 </div>
 
