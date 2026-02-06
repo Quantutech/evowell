@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth, useNavigation } from '@/App';
 import { api } from '@/services/api';
-import { supabase } from '@/services/supabase';
+import { storageService } from '@/services/storageService';
 import { 
   ProviderProfile, 
   SubscriptionTier, 
@@ -70,42 +70,13 @@ const ProviderProfileEditView: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 1. Optimistic update for immediate visual feedback (User Experience)
-    const objectUrl = URL.createObjectURL(file);
-    updateField('imageUrl', objectUrl);
-
     setIsSaving(true); // Lock UI interactions during upload
     try {
-      // 2. Prepare file path: userID/timestamp.ext
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      // 3. Upload to Supabase Storage 'provider-images' bucket
-      // Note: Bucket must be public for getPublicUrl to work without signed tokens
-      const { error: uploadError } = await supabase.storage
-        .from('provider-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      // 4. Retrieve the permanent public URL
-      const { data } = supabase.storage
-        .from('provider-images')
-        .getPublicUrl(filePath);
-
-      // 5. Update form state with the real remote URL
-      updateField('imageUrl', data.publicUrl);
-      console.log('Image uploaded successfully:', data.publicUrl);
-
+      const url = await storageService.uploadFile(file, `avatars/${user.id}/${Date.now()}_${file.name}`);
+      updateField('imageUrl', url);
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Image upload failed. Please ensure the file is under 2MB and try again.');
-      // Revert to original image on failure
-      updateField('imageUrl', provider?.imageUrl);
     } finally {
       setIsSaving(false);
     }

@@ -59,13 +59,16 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
   // Scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const isScrolled = scrollTop > 10;
       if (isScrolled !== scrolled) {
         setScrolled(isScrolled);
       }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    // Initial check
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll, { capture: true });
   }, [scrolled]);
 
   // Handle Search Input Esc key
@@ -274,13 +277,11 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
         ref={navbarRef}
         className={`fixed top-0 inset-x-0 z-[150] transition-all duration-300 ${
           scrolled 
-            ? 'bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm h-16' 
+            ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm h-16' 
             : 'bg-white/0 border-b border-transparent h-20'
         }`}
         aria-label="Main Navigation"
       >
-        <div className={`absolute inset-0 bg-white/95 backdrop-blur-xl border-b border-slate-100 transition-opacity duration-300 ${scrolled ? 'opacity-100' : 'opacity-0'}`}></div>
-        
         {/* Gradient Line Top */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 via-blue-500 to-brand-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
 
@@ -541,9 +542,6 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
           </div>
         )}
       </nav>
-      
-      {/* Spacer to prevent layout jump on scroll */}
-      {scrolled && <div className="h-20"></div>}
     </>
   );
 };

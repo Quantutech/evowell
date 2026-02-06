@@ -2,6 +2,9 @@ import React from 'react';
 import { BlogPost, User } from '@/types';
 import { BlogEditor } from '../../shared/BlogEditor';
 
+import Pagination from '../../../ui/Pagination';
+import { Skeleton } from '../../../ui/Skeleton';
+
 interface AdminBlogsTabProps {
   blogs: BlogPost[];
   editingBlog: Partial<BlogPost> | null;
@@ -9,10 +12,15 @@ interface AdminBlogsTabProps {
   onSave: (blog: Partial<BlogPost>) => Promise<void>;
   onApprove: (id: string) => void;
   onDelete: (id: string) => void;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  isLoading: boolean;
 }
 
 const AdminBlogsTab: React.FC<AdminBlogsTabProps> = ({ 
-  blogs, editingBlog, setEditingBlog, onSave, onApprove, onDelete 
+  blogs, editingBlog, setEditingBlog, onSave, onApprove, onDelete,
+  currentPage, totalPages, onPageChange, isLoading
 }) => {
   
   if (editingBlog) {
@@ -29,7 +37,7 @@ const AdminBlogsTab: React.FC<AdminBlogsTabProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 flex flex-col">
        <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
              <tr>
@@ -39,7 +47,15 @@ const AdminBlogsTab: React.FC<AdminBlogsTabProps> = ({
              </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-             {blogs.map(b => (
+             {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-8 py-6"><Skeleton className="h-4 w-64" /></td>
+                    <td className="px-8 py-6"><Skeleton className="h-6 w-20 rounded-lg" /></td>
+                    <td className="px-8 py-6 text-right"><Skeleton className="h-4 w-32 ml-auto" /></td>
+                  </tr>
+                ))
+             ) : blogs.map(b => (
                <tr key={b.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-8 py-6 text-sm font-bold">{b.title}</td>
                   <td className="px-8 py-6">
@@ -65,13 +81,22 @@ const AdminBlogsTab: React.FC<AdminBlogsTabProps> = ({
                   </td>
                </tr>
              ))}
-             {blogs.length === 0 && (
+             {!isLoading && blogs.length === 0 && (
                 <tr>
                    <td colSpan={3} className="text-center py-12 text-slate-400 italic font-medium">No blog posts found.</td>
                 </tr>
              )}
           </tbody>
        </table>
+       
+       <div className="p-6 border-t border-slate-100 bg-slate-50/30">
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={onPageChange} 
+            isLoading={isLoading}
+          />
+       </div>
     </div>
   );
 };

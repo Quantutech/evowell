@@ -29,6 +29,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { navigate } = useNavigation();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Poll for unread messages
   useEffect(() => {
@@ -158,15 +159,54 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       </aside>
 
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+          <div className="fixed top-0 left-0 bottom-0 w-72 shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col transition-all overflow-y-auto no-scrollbar bg-white dark:bg-slate-900">
+             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <Logo className="h-8" />
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-500">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+             </div>
+             <div className="p-4 flex-grow">
+                <nav className="space-y-2">
+                   {navItems.map(link => (
+                      <button 
+                        key={link.id}
+                        onClick={() => { onTabChange(link.id); setIsMobileMenuOpen(false); }}
+                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
+                          activeTab === link.id 
+                            ? `${themeColor} text-white shadow-lg` 
+                            : `text-slate-500 hover:bg-slate-50`
+                        }`}
+                      >
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} /></svg>
+                        <span>{link.label}</span>
+                      </button>
+                   ))}
+                </nav>
+             </div>
+             <div className="p-6 border-t border-slate-100">
+                <button onClick={logout} className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-all">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                  Sign Out
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <main className={`flex-grow ${isCollapsed ? 'lg:ml-20' : 'lg:ml-72'} transition-all duration-300 min-h-screen flex flex-col`}>
         {/* Header */}
-        <header className="h-20 px-8 flex items-center justify-between sticky top-0 z-20 bg-[#f8fafc]/95 backdrop-blur-sm border-b border-slate-200/50">
+        <header className="h-16 md:h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-20 bg-[#f8fafc]/95 backdrop-blur-sm border-b border-slate-200/50">
            <div className="flex items-center gap-4">
-              <div className="lg:hidden">
+              <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors">
                  <svg className="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-              </div>
-              <h2 className="text-xl font-black text-slate-900 capitalize tracking-tight hidden md:block">
+              </button>
+              <h2 className="text-lg md:text-xl font-black text-slate-900 capitalize tracking-tight">
                  {activeTab.replace('-', ' ')}
               </h2>
            </div>
@@ -189,7 +229,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </header>
 
         {/* Content */}
-        <div className="p-8 lg:p-12 max-w-7xl mx-auto w-full">
+        <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto w-full">
            {children}
         </div>
       </main>

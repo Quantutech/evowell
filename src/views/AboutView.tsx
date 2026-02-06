@@ -26,11 +26,11 @@ interface EnrichedProvider extends ProviderProfile {
 
 const AboutHeroVisual = () => (
   <div className="relative flex justify-end">
-     <div className="bg-[#f0f9ff] rounded-[4rem] p-10 relative overflow-hidden w-full max-w-lg">
-        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover rounded-[3rem] grayscale mix-blend-multiply opacity-80" alt="Clinical Illustration" />
+     <div className="bg-[#f0f9ff] rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-10 relative overflow-hidden w-full max-w-lg">
+        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover rounded-[1.75rem] md:rounded-[3rem] grayscale mix-blend-multiply opacity-80" alt="Clinical Illustration" />
         <div className="absolute inset-0 bg-brand-500/10"></div>
-        <div className="absolute top-10 left-10 w-16 h-16 bg-white rounded-full shadow-2xl flex items-center justify-center text-2xl">💬</div>
-        <div className="absolute bottom-10 right-10 w-16 h-16 bg-white rounded-full shadow-2xl flex items-center justify-center text-2xl">📞</div>
+        <div className="absolute top-6 left-6 md:top-10 md:left-10 w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-2xl flex items-center justify-center text-xl md:text-2xl">💬</div>
+        <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-2xl flex items-center justify-center text-xl md:text-2xl">📞</div>
      </div>
   </div>
 );
@@ -72,7 +72,7 @@ const USMap: React.FC<{ providers: EnrichedProvider[] }> = ({ providers }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
-    <div className="relative w-full aspect-[16/9] rounded-[3rem] overflow-hidden shadow-[0_8px_60px_-12px_rgba(0,0,0,0.08)] border border-slate-100 select-none"
+    <div className="relative w-full aspect-[4/3] md:aspect-[16/9] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_8px_60px_-12px_rgba(0,0,0,0.08)] border border-slate-100 select-none"
       style={{ background: 'linear-gradient(160deg, #f8fafc 0%, #eef4ff 50%, #f0fdf4 100%)' }}>
       {/* Subtle grid */}
       <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#475569 0.8px, transparent 0.8px)', backgroundSize: '24px 24px' }}></div>
@@ -143,8 +143,8 @@ const BioModal: React.FC<{ member: TeamMember; onClose: () => void }> = ({ membe
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md" onClick={onClose}>
-      <div className="bg-white w-full max-w-5xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[90vh]" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 bg-slate-900/60 backdrop-blur-md" onClick={onClose}>
+      <div className="bg-white w-full max-w-5xl rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row max-h-[90vh]" onClick={e => e.stopPropagation()}>
         <div className="md:w-2/5 relative h-72 md:h-auto shrink-0">
           <img src={member.img} className="w-full h-full object-cover" alt={member.name} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>
@@ -235,7 +235,8 @@ const AboutView: React.FC = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    Promise.all([api.getAllProviders(), api.getAllUsers()]).then(([providers, users]) => {
+    Promise.all([api.getAllProviders(), api.getAllUsers()]).then(([providersRes, users]) => {
+      const providers = providersRes.providers || [];
       const enriched = providers.map(p => {
         const user = users.find(u => u.id === p.userId);
         return { ...p, firstName: user?.firstName, lastName: user?.lastName };
@@ -329,7 +330,7 @@ const AboutView: React.FC = () => {
       {/* ── Stats ────────────────────────────────────────────────── */}
       <Section spacing="md" background="white">
          <Container>
-           <Grid cols={4} className="reveal">
+           <Grid cols={2} md={4} className="reveal">
               <AnimatedCounter target={50} label="Verified Experts" prefix="+" />
               <AnimatedCounter target={15} label="Specialties" prefix="+" />
               <AnimatedCounter target={100} label="Available Online" suffix="%" />

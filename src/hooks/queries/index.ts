@@ -80,10 +80,10 @@ export const useProvidersSearch = (filters: SearchFilters) => {
   });
 };
 
-export const useAllProviders = () => {
+export const useAllProviders = (page = 1, limit = 20) => {
   return useQuery({
-    queryKey: queryKeys.providers.all,
-    queryFn: () => api.getAllProviders(),
+    queryKey: [...queryKeys.providers.all, page, limit],
+    queryFn: () => api.getAllProviders({ page, limit }),
   });
 };
 
@@ -99,10 +99,10 @@ export const useAppointments = (userId: string, role: UserRole) => {
 
 // --- Blog Queries ---
 
-export const useBlogPosts = () => {
+export const useBlogPosts = (page = 1, limit = 10) => {
   return useQuery({
-    queryKey: queryKeys.blogs.all,
-    queryFn: () => api.getAllBlogs(),
+    queryKey: [...queryKeys.blogs.all, page, limit],
+    queryFn: () => api.getAllBlogs({ page, limit }),
   });
 };
 

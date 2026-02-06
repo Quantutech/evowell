@@ -51,7 +51,8 @@ const BlogListView: React.FC = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    api.getAllBlogs().then(data => {
+    api.getAllBlogs({ limit: 100 }).then(response => {
+      const data = response.data || [];
       const visibleBlogs = data.filter(b => b.status === 'APPROVED' || user?.role === UserRole.ADMIN);
       setBlogs(visibleBlogs);
       setLoading(false);

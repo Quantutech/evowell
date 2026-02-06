@@ -9,6 +9,8 @@ export interface CardProps {
   as?: 'div' | 'article' | 'section' | 'li';
   onClick?: () => void;
   id?: string;
+  role?: string;
+  'aria-label'?: string;
 }
 
 const variants = {
@@ -26,7 +28,7 @@ const sizes = {
 
 const hoverStyles = 'hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer';
 
-export const Card: React.FC<CardProps> = ({
+export const Card = React.forwardRef<HTMLElement, CardProps>(({
   children,
   variant = 'default',
   size = 'md',
@@ -36,8 +38,8 @@ export const Card: React.FC<CardProps> = ({
   onClick,
   id,
   ...props
-}) => {
-  const Component = as;
+}, ref) => {
+  const Component = as as any;
   
   // If onClick is provided, we default to hoverable unless explicitly disabled
   const isInteractive = hoverable || !!onClick;
@@ -53,6 +55,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <Component 
       id={id}
+      ref={ref}
       className={combinedClassName} 
       onClick={onClick}
       {...props}
@@ -60,7 +63,7 @@ export const Card: React.FC<CardProps> = ({
       {children}
     </Component>
   );
-};
+});
 
 // --- Subcomponents ---
 

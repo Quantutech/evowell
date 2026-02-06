@@ -44,62 +44,9 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const hasActiveFilters = !!(filters.specialty || filters.format || filters.state || filters.language || filters.day || filters.gender || filters.maxPrice);
   const isDirectoryMode = !filters.query && !hasActiveFilters;
-
-  // ── Manual Sticky Implementation ──────────────────────────
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!sidebarRef.current) return;
-      
-      const headerOffset = 100; // Height of header + spacing
-      const scrollY = window.scrollY;
-      const parent = sidebarRef.current.parentElement;
-      
-      if (!parent) return;
-
-      // Only apply if desktop
-      if (window.innerWidth < 1024) {
-        sidebarRef.current.style.transform = '';
-        return;
-      }
-      
-      // Calculate limits
-      const parentRect = parent.getBoundingClientRect();
-      const sidebarHeight = sidebarRef.current.offsetHeight;
-      const parentTop = parentRect.top + scrollY;
-      const parentHeight = parent.offsetHeight;
-      
-      // Basic sticky logic via transform
-      // We calculate how far we've scrolled past the start of the container
-      const delta = scrollY - parentTop + headerOffset;
-      
-      // Clamping:
-      // Min: 0 (don't go above start)
-      // Max: parentHeight - sidebarHeight (don't go below end)
-      const maxTranslate = Math.max(0, parentHeight - sidebarHeight);
-      const translate = Math.max(0, Math.min(delta, maxTranslate));
-      
-      if (delta > 0) {
-        sidebarRef.current.style.transform = `translateY(${translate}px)`;
-      } else {
-        sidebarRef.current.style.transform = 'translateY(0px)';
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-    // Initial check
-    handleScroll();
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, []); 
 
   // ── Debounce search input ─────────────────────────────────
 
@@ -129,12 +76,6 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
   });
-
-  // Re-run sticky logic when data changes (content height changes)
-  useEffect(() => {
-      // Trigger scroll event manually to update position
-      window.dispatchEvent(new Event('scroll'));
-  }, [data]);
 
   const rawResults = data?.pages.flatMap(p => p.providers) || [];
   const total = data?.pages[0]?.total || 0;
@@ -314,7 +255,7 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
       ]} />
 
       {/* ── Search header ────────────────────────────────────── */}
-      <div className="bg-white border-b border-slate-100 sticky top-16 z-40 shadow-sm">
+      <div className="bg-white border-b border-slate-100 z-40 shadow-sm">
         <Container>
           <div className="flex items-center gap-3 py-4">
             {/* Search input */}
@@ -428,10 +369,10 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
       <Container className="py-8 pb-24">
         <div className="flex flex-col lg:flex-row gap-8 items-start relative min-h-[500px]">
           
-          {/* Desktop filter sidebar */}
-          <aside className="hidden lg:block w-72 shrink-0">
-            <div className="sticky top-[136px] pb-10">
-              <Card className="p-6 !overflow-visible max-h-[calc(100vh-160px)] overflow-y-auto no-scrollbar">
+          {/* Desktop filter sidebar — sticky on scroll */}
+          <aside className="hidden lg:block w-72 shrink-0 self-start sticky top-20">
+            <div className="pb-10 max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
+              <Card className="p-6 !overflow-visible">
                 <div className="flex items-center justify-between mb-6">
                   <Heading level={4} className="text-sm">Filters</Heading>
                   {hasActiveFilters && (
@@ -444,7 +385,7 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
           </aside>
 
           {/* Results list */}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             {/* Results header */}
             <div className="mb-6">
               <Text variant="small" color="muted" className="font-semibold">

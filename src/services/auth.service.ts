@@ -36,8 +36,8 @@ function formatUser(row: any): User {
 class MockAuthService implements IAuthService {
   async login(email: string, password?: string): Promise<{ user: User; provider?: ProviderProfile; token: string }> {
     return handleRequest(async () => {
-        // Check both SEED_DATA and mockStore
-        let user = SEED_DATA.users.find(u => u.email === email) || mockStore.store.users.find(u => u.email === email);
+        // Check both SEED_DATA and mockStore (Prefer mockStore for updates)
+        let user = mockStore.store.users.find(u => u.email === email) || SEED_DATA.users.find(u => u.email === email);
         
         if (!user) {
              let role = UserRole.CLIENT;
@@ -173,12 +173,12 @@ class SupabaseAuthService implements IAuthService {
                   // PERSISTENCE FIX: Also cache on restore
                   if (provider) {
                     const store = persistence.loadStore();
-                    const providerToCache = provider; // local variable to satisfy TS
-                    const existingIdx = store.providers.findIndex(p => p.id === providerToCache.id);
+                    const pToCache = provider; 
+                    const existingIdx = store.providers.findIndex(p => p.id === pToCache.id);
                     if (existingIdx !== -1) {
-                        store.providers[existingIdx] = providerToCache;
+                        store.providers[existingIdx] = pToCache;
                     } else {
-                        store.providers.push(providerToCache);
+                        store.providers.push(pToCache);
                     }
                     persistence.saveStore(store);
                   }

@@ -243,7 +243,7 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
               Provider Directory
             </Heading>
             <Text variant="lead" className="text-slate-400 mb-8">
-              Browse our growing network of {allProviders.length > 0 ? allProviders.length : ''} verified mental health and wellness professionals.
+              Browse our growing network of verified mental health and wellness professionals.
             </Text>
 
             {/* Search redirect bar */}
@@ -261,11 +261,11 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
         </Container>
       </div>
 
-      {/* ── Specialty chips ───────────────────────────────────── */}
-      {topSpecialties.length > 0 && (
-        <div className="bg-white border-b border-slate-100 sticky top-0 z-30">
-          <Container>
-            <div className="flex items-center gap-2 py-3 overflow-x-auto no-scrollbar">
+      {/* ── Specialty chips & Controls ────────────────────────── */}
+      <div className="bg-white border-b border-slate-100 sticky top-16 z-30">
+        <Container>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-3">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
               <button
                 onClick={() => setSelectedSpecialty(null)}
                 className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -293,16 +293,55 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
                 </button>
               ))}
             </div>
-          </Container>
-        </div>
-      )}
+
+            <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-2 md:pt-0 border-slate-50">
+              {/* Sort dropdown */}
+              <div className="min-w-[140px]">
+                <Select
+                  value={sortBy}
+                  onChange={(val) => setSortBy(val as SortOption)}
+                  options={[
+                    { value: 'name-asc', label: 'Name A → Z' },
+                    { value: 'name-desc', label: 'Name Z → A' },
+                    { value: 'rating', label: 'Highest Rated' },
+                    { value: 'newest', label: 'Newest First' },
+                  ]}
+                  className="bg-slate-50 border-none"
+                />
+              </div>
+
+              {/* View toggle */}
+              <div className="flex bg-slate-100 p-1 rounded-xl">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}
+                  aria-label="List view"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}
+                  aria-label="Grid view"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </div>
 
       {/* ── Controls + Content ────────────────────────────────── */}
       <Container className="py-10 pb-24">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
 
           {/* Sidebar: Alphabet nav */}
-          <aside className="hidden lg:block w-12 shrink-0 sticky top-20">
+          <aside className="hidden lg:block w-12 shrink-0 sticky top-36">
             <div className="flex flex-col items-center gap-0.5">
               <button
                 onClick={() => setSelectedLetter(null)}
@@ -337,65 +376,6 @@ const DirectoryView: React.FC<{ specialties?: Specialty[] }> = ({ specialties = 
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Toolbar */}
-            <div className="sticky top-20 z-20 bg-[#f8fafc] py-2 mb-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                <Text variant="small" color="muted" className="font-semibold">
-                  {filtered.length} provider{filtered.length !== 1 ? 's' : ''}
-                  {selectedSpecialty && ` in ${topSpecialties.find(s => s.id === selectedSpecialty)?.name || 'selection'}`}
-                  {selectedLetter && ` starting with "${selectedLetter}"`}
-                </Text>
-                {(selectedSpecialty || selectedLetter) && (
-                  <button
-                    onClick={() => { setSelectedSpecialty(null); setSelectedLetter(null); }}
-                    className="text-xs font-bold text-brand-500 hover:text-brand-700 transition-colors"
-                  >
-                    Clear filters
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Sort dropdown */}
-                <div className="min-w-[140px]">
-                  <Select
-                    value={sortBy}
-                    onChange={(val) => setSortBy(val as SortOption)}
-                    options={[
-                      { value: 'name-asc', label: 'Name A → Z' },
-                      { value: 'name-desc', label: 'Name Z → A' },
-                      { value: 'rating', label: 'Highest Rated' },
-                      { value: 'newest', label: 'Newest First' },
-                    ]}
-                    className="bg-white" // Override bg-slate-50 if needed, but Select has hardcoded bg-slate-50.
-                  />
-                </div>
-
-                {/* View toggle */}
-                <div className="flex bg-slate-100 p-1 rounded-xl">
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}
-                    aria-label="List view"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:text-slate-600'}`}
-                    aria-label="Grid view"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                    </svg>
-                  </button>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Results */}
             {isLoading ? (

@@ -8,13 +8,13 @@
 // ============================================
 export const spacing = {
   section: {
-    sm: 'py-16',           // 128px total
-    md: 'py-24',           // 192px total  
-    lg: 'py-32',           // 256px total
+    sm: 'py-12 md:py-16',
+    md: 'py-16 md:py-24',
+    lg: 'py-20 md:py-32',
   },
   hero: {
-    top: 'pt-24',          // 96px (after 80px navbar)
-    bottom: 'pb-32',       // 128px
+    top: 'pt-20 md:pt-24 lg:pt-28',
+    bottom: 'pb-20 md:pb-32',
   },
   container: {
     padding: 'px-6 lg:px-8',
@@ -36,14 +36,14 @@ export const containers = {
 // ============================================
 export const typography = {
   // Display & Headlines
-  display: 'text-5xl lg:text-7xl font-black tracking-tight leading-[1.1]',
-  h1: 'text-4xl lg:text-5xl font-black tracking-tight leading-tight',
-  h2: 'text-3xl lg:text-4xl font-black tracking-tight',
-  h3: 'text-2xl font-black tracking-tight',
-  h4: 'text-xl font-bold',
+  display: 'text-4xl md:text-5xl lg:text-7xl font-black tracking-tight leading-[1.1]',
+  h1: 'text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight',
+  h2: 'text-2xl md:text-3xl lg:text-4xl font-black tracking-tight',
+  h3: 'text-xl md:text-2xl font-black tracking-tight',
+  h4: 'text-lg md:text-xl font-bold',
   
   // Body Text
-  lead: 'text-xl font-medium leading-relaxed',
+  lead: 'text-lg md:text-xl font-medium leading-relaxed',
   body: 'text-base font-medium leading-relaxed',
   small: 'text-sm font-medium',
   
@@ -110,10 +110,10 @@ export const shadows = {
 // ============================================
 export const components = {
   // Buttons
-  buttonPrimary: 'bg-slate-900 text-white px-8 py-4 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/10 hover:bg-slate-800 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2',
-  buttonSecondary: 'bg-white text-slate-700 px-8 py-4 rounded-xl font-bold text-sm border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2',
-  buttonBrand: 'bg-brand-500 text-white px-8 py-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2',
-  buttonGhost: 'text-slate-600 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400',
+  buttonPrimary: 'bg-slate-900 text-white px-6 py-4 md:px-8 md:py-4 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/10 hover:bg-slate-800 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2',
+  buttonSecondary: 'bg-white text-slate-700 px-6 py-4 md:px-8 md:py-4 rounded-xl font-bold text-sm border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2',
+  buttonBrand: 'bg-brand-500 text-white px-6 py-4 md:px-8 md:py-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2',
+  buttonGhost: 'text-slate-600 px-5 py-4 md:px-6 md:py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400',
   
   // Cards
   card: 'bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50',

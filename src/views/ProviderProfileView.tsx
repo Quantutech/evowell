@@ -121,11 +121,13 @@ const ProviderProfileView: React.FC<{ providerId?: string }> = ({ providerId: pr
     staleTime: 24 * 60 * 60 * 1000,
   });
 
-  const { data: allBlogs = [] } = useQuery({
+  const { data: blogsResponse } = useQuery({
     queryKey: ['allBlogs'],
-    queryFn: () => api.getAllBlogs(),
+    queryFn: () => api.getAllBlogs({ limit: 1000 }),
     staleTime: 5 * 60 * 1000,
   });
+
+  const allBlogs = blogsResponse?.data || [];
 
   // ── Derived state ───────────────────────────────────────────
 
@@ -318,7 +320,7 @@ const ProviderProfileView: React.FC<{ providerId?: string }> = ({ providerId: pr
             <IdentityCard provider={provider} />
 
             {/* Tab Navigation */}
-            <nav className="sticky top-20 z-30 bg-[#F8FAFC]/95 backdrop-blur-sm pt-2 pb-4 mb-4" aria-label="Profile sections">
+            <nav className="sticky top-20 z-30 bg-[#F8FAFC] pt-2 pb-4 mb-4" aria-label="Profile sections">
               <div className="flex gap-2 overflow-x-auto no-scrollbar bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit max-w-full" role="tablist">
                 {tabs.map(tab => (
                   <button

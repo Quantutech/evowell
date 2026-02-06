@@ -38,7 +38,7 @@ export interface IProviderService {
   getProviderById(id: string): Promise<ProviderProfile | undefined>;
   getProviderByUserId(userId: string): Promise<ProviderProfile | undefined>;
   updateProvider(id: string, data: Partial<ProviderProfile>): Promise<ProviderProfile>;
-  getAllProviders(): Promise<ProviderProfile[]>;
+  getAllProviders(params?: { page?: number, limit?: number }): Promise<{ providers: ProviderProfile[], total: number }>;
   getProviderBySlug(slug: string): Promise<ProviderProfile | undefined>;
   fetchProviderBySlugOrId(slugOrId: string): Promise<ProviderProfile | undefined>;
   moderateProvider(id: string, status: ModerationStatus): Promise<void>;
@@ -378,8 +378,12 @@ class MockProviderService implements IProviderService {
     }, 'updateProvider');
   }
 
-  async getAllProviders(): Promise<ProviderProfile[]> {
+  async getAllProviders(params?: { page?: number, limit?: number }): Promise<{ providers: ProviderProfile[], total: number }> {
     return handleRequest(async () => {
+        const page = params?.page || 1;
+        const limit = params?.limit || 10;
+        const start = (page - 1) * limit;
+
         const allProviders = [...SEED_DATA.providers, ...mockStore.store.providers];
         const users = [...SEED_DATA.users, ...mockStore.store.users];
         
@@ -387,7 +391,10 @@ class MockProviderService implements IProviderService {
           index === self.findIndex(t => t.id === p.id)
         );
 
-        return uniqueProviders.map(p => {
+        const total = uniqueProviders.length;
+        const paged = uniqueProviders.slice(start, start + limit);
+
+        const providers = paged.map(p => {
           const user = users.find(u => u.id === p.userId);
           return {
             ...p,
@@ -397,6 +404,8 @@ class MockProviderService implements IProviderService {
             isPublished: p.isPublished ?? true 
           };
         });
+
+        return { providers, total };
     }, 'getAllProviders');
   }
 
@@ -528,12 +537,20 @@ class SupabaseProviderService implements IProviderService {
 
   async getProviderById(id: string): Promise<ProviderProfile | undefined> {
     // 1. Try Supabase first
-    const { data, error } = await (supabase.from('providers') as any)
+    const { data: providerData, error } = await (supabase.from('providers') as any)
       .select('*')
       .eq('id', id)
       .maybeSingle(); 
 
-    if (data && !error) return formatProvider(data);
+    if (providerData && !error) {
+        // Fetch user data to enrich
+        const { data: userData } = await (supabase.from('users') as any)
+            .select('first_name, last_name, email')
+            .eq('id', providerData.user_id)
+            .single();
+            
+        return formatProvider({ ...providerData, ...userData });
+    }
 
     // 2. Fallback to Mock Store (Robust Fallback)
     const mock = mockStore.store.providers.find(p => p.id === id) || SEED_DATA.providers.find(p => p.id === id);
@@ -589,11 +606,21 @@ class SupabaseProviderService implements IProviderService {
   }
 
   async getProviderByUserId(userId: string): Promise<ProviderProfile | undefined> {
-    const { data, error } = await (supabase.from('providers') as any).select('*').eq('user_id', userId).single();
+    const { data: providerData, error } = await (supabase.from('providers') as any).select('*').eq('user_id', userId).single();
     if (error && error.code !== 'PGRST116') {
         errorHandler.logError(error, { method: 'getProviderByUserId', userId });
     }
-    return data ? formatProvider(data) : undefined;
+    
+    if (providerData) {
+        const { data: userData } = await (supabase.from('users') as any)
+            .select('first_name, last_name, email')
+            .eq('id', userId)
+            .single();
+            
+        return formatProvider({ ...providerData, ...userData });
+    }
+    
+    return undefined;
   }
 
   async updateProvider(id: string, data: Partial<ProviderProfile>): Promise<ProviderProfile> {
@@ -648,44 +675,40 @@ class SupabaseProviderService implements IProviderService {
     }, 'updateProvider');
   }
 
-  async getAllProviders(): Promise<ProviderProfile[]> {
+  async getAllProviders(params?: { page?: number, limit?: number }): Promise<{ providers: ProviderProfile[], total: number }> {
     return handleRequest(async () => {
-      // Always fallback to manual join if joined query has issues, but try simple first to avoid 400s
-      // The issue is likely the syntax or RLS on joined table not allowing this specific shape
-      
-      // Step 1: Fetch providers directly
-      const { data: providers, error: provError } = await (supabase.from('providers') as any)
-        .select('*')
-        .order('created_at', { ascending: false });
+      const page = params?.page || 1;
+      const limit = params?.limit || 10;
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      // Step 1: Fetch providers with range
+      const { data: providers, error: provError, count } = await (supabase.from('providers') as any)
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (provError) throw provError;
-      if (!providers || providers.length === 0) return [];
+      if (!providers || providers.length === 0) return { providers: [], total: 0 };
 
       // Step 2: Fetch corresponding users
       const userIds = providers.map((p: any) => p.user_id).filter(Boolean);
-      if (userIds.length === 0) return providers.map((p: any) => formatProvider(p));
-
+      
       const { data: users, error: userError } = await (supabase.from('users') as any)
         .select('id, first_name, last_name, email, role')
         .in('id', userIds);
 
-      if (userError) {
-        console.warn('Error fetching users for manual join:', userError);
-        // Return providers without enriched user data as fallback
-        return providers.map((p: any) => formatProvider(p));
-      }
-
-      // Step 3: Merge in memory
       const userMap = (users || []).reduce((acc: any, u: any) => {
         acc[u.id] = u;
         return acc;
       }, {});
 
-      return providers.map((p: any) => {
-        // Manually merge user props that formatProvider expects
+      const result = providers.map((p: any) => {
         const user = userMap[p.user_id] || {};
         return formatProvider({ ...p, ...user });
       });
+
+      return { providers: result, total: count || result.length };
     }, 'getAllProviders');
   }
 

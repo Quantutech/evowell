@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigation } from '../../App';
 import { ProviderProfile } from '../../types';
+import { designSystem } from '@/styles/design-system';
 
 interface FeaturedProvider extends ProviderProfile {
   firstName: string;
@@ -70,16 +71,15 @@ const FeaturedProviders: React.FC<{ providers: FeaturedProvider[] }> = ({ provid
 
   return (
     <section 
-      className="py-24 mt-20 bg-[#F8FAFC] border-y border-slate-100 relative overflow-hidden"
-    >
+      className={`${designSystem.spacing.section.md} mt-12 md:mt-20 bg-[#F8FAFC] border-y border-slate-100 relative overflow-hidden`}>
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-50/50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
       
       <div className="max-w-[1440px] mx-auto px-6 relative z-10">
-        <div className="max-w-7xl mx-auto mb-16 flex flex-col md:flex-row justify-between items-end gap-6">
+        <div className="max-w-7xl mx-auto mb-10 md:mb-16 flex flex-col md:flex-row justify-between items-end gap-6">
           <div>
             <p className="text-brand-500 text-xs font-bold uppercase tracking-widest mb-4">Our Network</p>
-            <h2 className="text-4xl font-black text-slate-900 mb-4">Real People. Real Support.</h2>
-            <p className="text-slate-500 font-medium text-lg max-w-xl">Meet our verified providers: Care from licensed therapists, coaches, and nutritionists dedicated to your growth.</p>
+            <h2 className={`${designSystem.typography.h1} mb-4`}>Real People. Real Support.</h2>
+            <p className={`${designSystem.typography.body} text-slate-500 max-w-xl`}>Meet our verified providers: Care from licensed therapists, coaches, and nutritionists dedicated to your growth.</p>
           </div>
           <div className="flex gap-4">
             <button onClick={() => manualScroll('left')} className="w-12 h-12 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-brand-500 hover:border-brand-500 hover:shadow-lg transition-all"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg></button>
@@ -108,7 +108,7 @@ const FeaturedProviders: React.FC<{ providers: FeaturedProvider[] }> = ({ provid
               onClick={() => navigate(`#/provider/${p.id}`)}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="relative min-w-[320px] h-[450px] bg-white rounded-3xl overflow-hidden cursor-pointer group shadow-xl hover:shadow-2xl border border-slate-100 hover:border-brand-100 transition-all duration-500 hover:-translate-y-2"
+              className="relative min-w-[280px] md:min-w-[320px] h-[400px] md:h-[450px] bg-white rounded-3xl overflow-hidden cursor-pointer group shadow-xl hover:shadow-2xl border border-slate-100 hover:border-brand-100 transition-all duration-500 hover:-translate-y-2"
             >
               <div className="absolute inset-0 h-[62%] overflow-hidden">
                 <img src={p.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={`Dr. ${p.lastName}`} />

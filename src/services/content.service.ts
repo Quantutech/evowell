@@ -5,7 +5,7 @@ import { isConfigured } from './supabase';
 import { handleRequest } from './serviceUtils';
 
 export interface IContentService {
-  getAllBlogs(): Promise<BlogPost[]>;
+  getAllBlogs(params?: { page?: number, limit?: number }): Promise<{ data: BlogPost[], total: number }>;
   getBlogBySlug(slug: string): Promise<BlogPost | undefined>;
   getBlogsByProvider(id: string): Promise<BlogPost[]>;
   createBlog(data: any): Promise<void>;
@@ -35,15 +35,24 @@ export interface IContentService {
 // =========================================================
 
 class MockContentService implements IContentService {
-  async getAllBlogs(): Promise<BlogPost[]> { return db.getBlogs(); }
+  async getAllBlogs(params?: { page?: number, limit?: number }): Promise<{ data: BlogPost[], total: number }> { 
+    const all = await db.getBlogs(); 
+    const page = params?.page || 1;
+    const limit = params?.limit || 10;
+    const start = (page - 1) * limit;
+    return {
+        data: all.slice(start, start + limit),
+        total: all.length
+    };
+  }
   
   async getBlogBySlug(slug: string): Promise<BlogPost | undefined> { 
-    const all = await this.getAllBlogs(); 
-    return all.find(b => b.slug === slug); 
+    const { data: all } = await this.getAllBlogs({ limit: 1000 }); 
+    return all.find((b: BlogPost) => b.slug === slug); 
   }
   
   async getBlogsByProvider(id: string): Promise<BlogPost[]> { 
-    const all = await this.getAllBlogs(); 
+    const all = await db.getBlogs(); 
     return all.filter(b => b.providerId === id); 
   }
   

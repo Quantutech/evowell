@@ -26,6 +26,9 @@ import AdminClientsTab from '../components/dashboard/tabs/admin/AdminClientsTab'
 import AdminJobsTab from '../components/dashboard/tabs/admin/AdminJobsTab';
 import { ResetDataButton } from '../components/dashboard/tabs/admin/ResetDataButton';
 import AddUserModal from '../components/dashboard/tabs/admin/AddUserModal';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { providerProfileSchema } from '../utils/validation-schemas';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -56,11 +59,14 @@ const AdminDashboard: React.FC = () => {
     staleTime: 5 * 60 * 1000
   });
 
-  const { data: blogs = [], refetch: refetchBlogs } = useQuery({
-    queryKey: ['adminBlogs'],
-    queryFn: () => api.getAllBlogs(),
+  const [blogsPage, setBlogsPage] = useState(1);
+  const { data: blogsData, refetch: refetchBlogs, isLoading: blogsLoading } = useQuery({
+    queryKey: ['adminBlogs', blogsPage],
+    queryFn: () => api.getAllBlogs({ page: blogsPage, limit: 10 }),
     enabled: user?.role === UserRole.ADMIN
   });
+  const blogs = blogsData?.data || [];
+  const blogsTotalPages = Math.ceil((blogsData?.total || 0) / 10);
 
   const { data: testimonials = [], refetch: refetchTestimonials } = useQuery({
     queryKey: ['adminTestimonials'],
@@ -260,7 +266,11 @@ const AdminDashboard: React.FC = () => {
             setEditingBlog={setEditingBlog} 
             onSave={handleSaveBlog} 
             onApprove={handleApproveBlog} 
-            onDelete={handleDeleteBlog} 
+            onDelete={handleDeleteBlog}
+            currentPage={blogsPage}
+            totalPages={blogsTotalPages}
+            onPageChange={setBlogsPage}
+            isLoading={blogsLoading}
         />
       )}
 
@@ -348,28 +358,23 @@ const DetailModal = ({ user: u, provider: p, onClose, onUpdateProvider, onRefres
     onDeleteUser: (id: string) => void
 }) => {
     const [tab, setTab] = useState<'actions' | 'edit'>('actions');
-    const [editForm, setEditForm] = useState<ProviderProfile | null>(p ? JSON.parse(JSON.stringify(p)) : null);
+    
+    const { register, handleSubmit, setValue, watch } = useForm<ProviderProfile>({
+        resolver: zodResolver(providerProfileSchema) as any,
+        defaultValues: p || undefined
+    });
 
-    const updateField = (field: string, value: any) => {
-      if (!editForm) return;
-      setEditForm({ ...editForm, [field]: value });
-    };
+    const editForm = watch();
 
     const updateAddress = (field: string, value: string) => {
-      if (!editForm) return;
-      setEditForm({ 
-        ...editForm, 
-        businessAddress: { ...(editForm.businessAddress || {}), [field]: value } as any
-      });
+      setValue('businessAddress', { ...(editForm.businessAddress || {}), [field]: value } as any);
     };
 
   // In the DetailModal component, update the save function:
-  const handleSaveDetails = async () => {
-      if(!editForm) return;
+  const handleSaveDetails = async (data: ProviderProfile) => {
       try {
-          await onUpdateProvider(editForm.id, editForm);
+          await onUpdateProvider(data.id, data);
           alert("Provider details updated.");
-          // Optionally refresh data
           onRefresh();
       } catch (e) {
           alert("Failed to update provider.");
@@ -417,11 +422,11 @@ const DetailModal = ({ user: u, provider: p, onClose, onUpdateProvider, onRefres
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase">Profile Slug</label>
-                            <input value={editForm.profileSlug || ''} onChange={e => updateField('profileSlug', e.target.value)} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="dr-name-specialty" />
+                            <input {...register('profileSlug')} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="dr-name-specialty" />
                         </div>
                         <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase">Pronouns</label>
-                            <input value={editForm.pronouns || ''} onChange={e => updateField('pronouns', e.target.value)} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="They/Them" />
+                            <input {...register('pronouns')} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="They/Them" />
                         </div>
                     </div>
                   </div>
@@ -432,11 +437,11 @@ const DetailModal = ({ user: u, provider: p, onClose, onUpdateProvider, onRefres
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase">Phone Number</label>
-                            <input value={editForm.phoneNumber || ''} onChange={e => updateField('phoneNumber', e.target.value)} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="(555) 000-0000" />
+                            <input {...register('phoneNumber')} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="(555) 000-0000" />
                         </div>
                         <div>
                             <label className="text-[10px] font-bold text-slate-400 uppercase">Website</label>
-                            <input value={editForm.website || ''} onChange={e => updateField('website', e.target.value)} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="https://" />
+                            <input {...register('website')} className="w-full bg-slate-50 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20" placeholder="https://" />
                         </div>
                     </div>
                   </div>
@@ -452,7 +457,7 @@ const DetailModal = ({ user: u, provider: p, onClose, onUpdateProvider, onRefres
                     </div>
                   </div>
 
-                  <button onClick={handleSaveDetails} className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 transition-all">Save Changes</button>
+                  <button onClick={handleSubmit(handleSaveDetails)} className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-slate-800 transition-all">Save Changes</button>
                </div>
              )}
            </div>

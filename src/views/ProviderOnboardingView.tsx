@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { providerProfileSchema } from '@/utils/validation-schemas';
 import { useAuth, useNavigation } from '@/App';
 import { useToast } from '@/contexts/ToastContext';
 import { api } from '@/services/api';
@@ -78,7 +81,13 @@ const ProviderOnboardingView: React.FC = () => {
   const { navigate } = useNavigation();
   const { addToast } = useToast();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<ProviderProfile | null>(provider);
+  
+  const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<ProviderProfile>({
+    resolver: zodResolver(providerProfileSchema) as any,
+    defaultValues: provider || undefined
+  });
+
+  const formData = watch();
   const [isSaving, setIsSaving] = useState(false);
   const [idFile, setIdFile] = useState<File | null>(null);
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
@@ -93,7 +102,7 @@ const ProviderOnboardingView: React.FC = () => {
         try {
           const { formData: savedData, step: savedStep } = JSON.parse(saved);
           if (savedData) {
-            setFormData(prev => ({ ...prev, ...savedData }));
+            reset(savedData);
             addToast('info', 'Restored your previous session');
           }
           if (savedStep) setStep(savedStep);
@@ -102,7 +111,7 @@ const ProviderOnboardingView: React.FC = () => {
         }
       }
     }
-  }, [provider?.id]);
+  }, [provider?.id, reset, addToast]);
 
   // Auto-save progress
   useEffect(() => {
@@ -116,12 +125,24 @@ const ProviderOnboardingView: React.FC = () => {
     api.getAllSpecialties().then(setSpecialtiesList);
   }, []);
 
-  const handleSaveExit = () => {
+  const handleSaveExit = async () => {
     if (provider?.id && formData) {
-      const key = `provider_onboarding_${provider.id}`;
-      localStorage.setItem(key, JSON.stringify({ formData, step }));
-      addToast('success', 'Progress saved. You can resume later.');
-      navigate('/console');
+      setIsSaving(true);
+      try {
+        await api.updateProvider(formData.id, {
+          ...formData,
+          onboardingComplete: false
+        });
+        const key = `provider_onboarding_${provider.id}`;
+        localStorage.setItem(key, JSON.stringify({ formData, step }));
+        addToast('success', 'Progress saved to cloud. You can resume later.');
+        navigate('/console');
+      } catch (e) {
+        addToast('error', 'Failed to save to cloud, but local progress is kept.');
+        navigate('/console');
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -129,27 +150,34 @@ const ProviderOnboardingView: React.FC = () => {
 
   const totalSteps = 6;
 
-  const nextStep = () => setStep(s => Math.min(s + 1, totalSteps));
+  const nextStep = async () => {
+    // Save progress to database on step change
+    if (formData) {
+      try {
+        await api.updateProvider(formData.id, {
+          ...formData,
+          onboardingComplete: false,
+          moderationStatus: ModerationStatus.PENDING
+        });
+      } catch (e) {
+        console.warn("Server-side save failed, relying on local backup:", e);
+      }
+    }
+    setStep(s => Math.min(s + 1, totalSteps));
+  };
+
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
-  const updateField = (path: string, value: any) => {
-    const newData = { ...formData };
-    const parts = path.split('.');
-    let current: any = newData;
-    for (let i = 0; i < parts.length - 1; i++) {
-      if (!current[parts[i]]) current[parts[i]] = {};
-      current = current[parts[i]];
-    }
-    current[parts[parts.length - 1]] = value;
-    setFormData(newData);
+  const updateField = (path: any, value: any) => {
+    setValue(path, value, { shouldValidate: true, shouldDirty: true });
   };
 
   const toggleList = (field: keyof ProviderProfile, value: any) => {
-    const list = [...(formData[field] as any[])];
-    const index = list.indexOf(value);
-    if (index > -1) list.splice(index, 1);
-    else list.push(value);
-    setFormData({ ...formData, [field]: list });
+    const currentList = (formData[field] as any[]) || [];
+    const newList = currentList.includes(value)
+      ? currentList.filter(v => v !== value)
+      : [...currentList, value];
+    setValue(field, newList as any, { shouldValidate: true, shouldDirty: true });
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -251,20 +279,20 @@ const ProviderOnboardingView: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">First Name</label>
                     <input
-                      value={formData.firstName || ''}
-                      onChange={e => updateField('firstName', e.target.value)}
+                      {...register('firstName')}
                       placeholder="Jane"
-                      className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none"
+                      className={`w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none ${errors.firstName ? 'ring-2 ring-red-500' : ''}`}
                     />
+                    {errors.firstName && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.firstName.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Name</label>
                     <input
-                      value={formData.lastName || ''}
-                      onChange={e => updateField('lastName', e.target.value)}
+                      {...register('lastName')}
                       placeholder="Doe"
-                      className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none"
+                      className={`w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 outline-none ${errors.lastName ? 'ring-2 ring-red-500' : ''}`}
                     />
+                    {errors.lastName && <p className="text-[10px] text-red-500 font-bold ml-1">{errors.lastName.message}</p>}
                   </div>
                 </div>
 

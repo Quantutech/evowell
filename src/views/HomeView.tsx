@@ -29,8 +29,8 @@ const HomeHeroVisual = () => {
   ];
 
   return (
-    <div className="relative w-full max-w-lg">
-       <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-6 rounded-[2.5rem] shadow-2xl w-full relative z-20 transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
+    <div className="relative w-full max-w-lg transform scale-90 md:scale-100 origin-center md:origin-right transition-transform">
+       <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl w-full relative z-20 transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
           <div className="flex justify-between items-center mb-8">
              <div>
                 <Label variant="overline" color="muted" className="mb-1">Weekly Growth</Label>
@@ -170,12 +170,14 @@ const HomeView: React.FC<{ specialties: Specialty[] }> = ({ specialties }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [searchRes, allUsers, allBlogs, homeTestimonials] = await Promise.all([
+      const [searchRes, allUsers, allBlogsResponse, homeTestimonials] = await Promise.all([
         api.search({}),
         api.getAllUsers(),
-        api.getAllBlogs(),
+        api.getAllBlogs({ limit: 10 }),
         api.getTestimonials('home'),
       ]);
+
+      const allBlogs = allBlogsResponse.data || [];
 
       const providersWithNames = searchRes.providers.map(p => {
         const user = allUsers.find(u => u.id === p.userId);
@@ -338,14 +340,14 @@ const HomeView: React.FC<{ specialties: Specialty[] }> = ({ specialties }) => {
                   Our providers are in-network with top carriers. We handle the verification and billing so you can focus on your health.
                </Text>
             </div>
-            <div className="flex flex-wrap justify-center gap-6 reveal">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 reveal">
                {['Aetna', 'Cigna', 'BlueCross BlueShield', 'UnitedHealthcare', 'Medicare', 'Oscar'].map((name, i) => (
-                  <div key={i} className="bg-slate-50 border border-slate-200 px-8 py-4 rounded-xl flex items-center justify-center min-w-[140px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
-                     <span className="text-lg font-black italic tracking-tight text-slate-700">{name}</span>
+                  <div key={i} className="bg-slate-50 border border-slate-200 px-6 py-3 md:px-8 md:py-4 rounded-xl flex items-center justify-center min-w-[120px] md:min-w-[140px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                     <span className="text-base md:text-lg font-black italic tracking-tight text-slate-700">{name}</span>
                   </div>
                ))}
-               <div className="bg-white border-2 border-dashed border-slate-200 px-8 py-4 rounded-xl flex items-center justify-center min-w-[140px] text-slate-500 font-bold text-xs uppercase tracking-widest">
-                  + FSA / HSA Accepted
+               <div className="bg-white border-2 border-dashed border-slate-200 px-6 py-3 md:px-8 md:py-4 rounded-xl flex items-center justify-center min-w-[120px] md:min-w-[140px] text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest">
+                  + FSA / HSA
                </div>
             </div>
          </Container>
@@ -458,23 +460,23 @@ const HomeView: React.FC<{ specialties: Specialty[] }> = ({ specialties }) => {
       {/* ── Areas of Support (compact) ───────────────────────────── */}
       <Section spacing="sm" background="default">
         <Container>
-          <div className="flex justify-between items-end mb-8 reveal">
+          <div className="flex justify-between items-end mb-6 md:mb-8 reveal">
              <div>
                <Label variant="overline" color="brand" className="mb-3">Specialties</Label>
                <Heading level={2}>Areas of Support</Heading>
              </div>
-             <Button variant="ghost" onClick={() => navigate('#/search')}>View All →</Button>
+             <Button variant="ghost" size="sm" onClick={() => navigate('#/search')}>View All →</Button>
           </div>
 
           {/* Horizontal scroll on mobile, 6-col grid on desktop */}
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 md:grid md:grid-cols-6 md:overflow-visible reveal">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-4 md:grid md:grid-cols-6 md:overflow-visible reveal">
              {areasOfSupport.map((area, i) => (
                <div
                  key={i}
                  onClick={() => navigate(`#/search?specialty=${area.id}`)}
-                 className="group cursor-pointer shrink-0 w-40 md:w-auto"
+                 className="group cursor-pointer shrink-0 w-36 md:w-auto"
                >
-                  <div className="relative rounded-2xl overflow-hidden aspect-[4/5] shadow-sm group-hover:shadow-lg transition-all duration-300">
+                  <div className="relative rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] shadow-sm group-hover:shadow-lg transition-all duration-300">
                      <img
                        src={area.img}
                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -517,13 +519,13 @@ const HomeView: React.FC<{ specialties: Specialty[] }> = ({ specialties }) => {
       {/* ── Blog ─────────────────────────────────────────────────── */}
       <Section spacing="md" background="default">
          <Container size="full">
-           <div className="mb-12 reveal">
+           <div className="mb-8 md:mb-12 reveal">
               <Heading level={2}>Everyday Wellness Support</Heading>
            </div>
-           <Grid cols={3} className="reveal">
+           <Grid cols={1} sm={2} md={3} gap="lg" className="reveal">
               {blogs.map(post => (
                  <div key={post.id} onClick={() => navigate(`#/blog/${post.slug}`)} className="group cursor-pointer">
-                    <div className="aspect-[16/10] rounded-[2rem] overflow-hidden mb-6 relative">
+                    <div className="aspect-[16/10] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden mb-4 md:mb-6 relative">
                        <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="" loading="lazy" />
                     </div>
                     <Label variant="overline" color="brand" className="mb-2">{post.category}</Label>

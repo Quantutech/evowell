@@ -105,8 +105,9 @@ const BlogDetailsView: React.FC<{ slug: string }> = ({ slug }) => {
 
     Promise.all([
       api.getBlogBySlug(slug),
-      api.getAllBlogs(),
-    ]).then(([b, all]) => {
+      api.getAllBlogs({ limit: 100 }),
+    ]).then(([b, allResponse]) => {
+      const all = allResponse.data || [];
       setBlog(b || null);
       if (b && b.content) {
         setSanitizedContent(sanitizeHTML(b.content));
@@ -262,9 +263,9 @@ const BlogDetailsView: React.FC<{ slug: string }> = ({ slug }) => {
               </div>
 
               {/* ── Tags ─────────────────────────────────────── */}
-              {blog.tags && blog.tags.length > 0 ? (
+              {(blog as any).tags && (blog as any).tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2 pt-8 mt-10 border-t border-slate-100">
-                  {blog.tags.map((tag: string) => (
+                  {(blog as any).tags.map((tag: string) => (
                     <Tag key={tag} onSelect={() => navigate(`#/blog?category=${encodeURIComponent(tag)}`)}>{tag}</Tag>
                   ))}
                 </div>

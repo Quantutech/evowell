@@ -35,7 +35,7 @@ class ApiService {
   getProviderById(id: string) { return providerService.getProviderById(id); }
   getProviderByUserId(userId: string) { return providerService.getProviderByUserId(userId); }
   updateProvider(id: string, data: Partial<ProviderProfile>) { return providerService.updateProvider(id, data); }
-  getAllProviders() { return providerService.getAllProviders(); }
+  getAllProviders(params?: { page?: number, limit?: number }) { return providerService.getAllProviders(params); }
   getProviderBySlug(slug: string) { return providerService.getProviderBySlug(slug); }
   fetchProviderBySlugOrId(slugOrId: string) { return providerService.fetchProviderBySlugOrId(slugOrId); }
   moderateProvider(id: string, status: ModerationStatus) { return providerService.moderateProvider(id, status); }
@@ -74,7 +74,7 @@ class ApiService {
   getUnreadCount(uid: string) { return clientService.getUnreadCount(uid); }
 
   // Content Service Delegates
-  getAllBlogs() { return contentService.getAllBlogs(); }
+  getAllBlogs(params?: { page?: number, limit?: number }) { return contentService.getAllBlogs(params); }
   getBlogBySlug(slug: string) { return contentService.getBlogBySlug(slug); }
   getBlogsByProvider(id: string) { return contentService.getBlogsByProvider(id); }
   createBlog(data: any) { return contentService.createBlog(data); }

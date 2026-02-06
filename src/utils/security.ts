@@ -1,18 +1,17 @@
 
+import { sanitizeHTML } from './content-sanitizer';
+
 /**
  * Security Utilities
  * Prevents XSS and enforces password strength
  */
 
+/**
+ * @deprecated Use sanitizeHTML from src/utils/content-sanitizer.ts instead.
+ * sanitizeHTML uses DOMPurify which is more robust than simple string replacement.
+ */
 export const sanitizeInput = (input: string): string => {
-  if (!input) return '';
-  // Basic XSS prevention: remove script tags and html entities
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return sanitizeHTML(input);
 };
 
 export const checkPasswordStrength = (password: string): { score: number; feedback: string } => {

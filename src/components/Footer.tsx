@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@/App';
 import Logo from '@/components/brand/Logo';
+import { designSystem } from '@/styles/design-system';
 
 const Link: React.FC<{ href: string; className?: string; children: React.ReactNode }> = ({ href, className, children }) => {
   const { navigate } = useNavigation();
@@ -58,11 +59,11 @@ const Footer: React.FC = () => {
   
   return (
     <div ref={footerRef} className="opacity-0 translate-y-20 transition-all duration-1000 ease-out">
-      <footer className="relative mt-40">
+      <footer className="relative mt-16 md:mt-24 lg:mt-40">
         {/* Curved Top */}
-        <div className="absolute top-0 left-[-5%] w-[110%] overflow-hidden leading-none -translate-y-[99%] z-10 pointer-events-none">
+        <div className="absolute top-0 left-[-5%] w-[110%] overflow-hidden leading-none -translate-y-[98%] z-10 pointer-events-none">
           <svg 
-            className="relative block w-full h-[80px] md:h-[120px]" 
+            className="relative block w-full h-[40px] md:h-[80px] lg:h-[120px]" 
             data-name="Layer 1" 
             xmlns="http://www.w3.org/2000/svg" 
             viewBox="0 0 1200 120" 
@@ -81,15 +82,15 @@ const Footer: React.FC = () => {
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
           
           <div className="max-w-[1440px] mx-auto px-8 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-20 items-center">
               
               {/* Left: Newsletter */}
-              <div className="lg:col-span-5 space-y-8 text-center lg:text-left">
+              <div className="lg:col-span-5 space-y-6 lg:space-y-8 text-center lg:text-left">
                   <div>
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-white">
+                    <h2 className={`${designSystem.typography.h2} mb-4 text-white`}>
                       Join the Evolution
                     </h2>
-                    <p className="text-white/70 text-base max-w-md mx-auto lg:mx-0 font-medium">
+                    <p className="text-white/70 text-sm md:text-base max-w-md mx-auto lg:mx-0 font-medium">
                       Weekly insights for the modern wellness professional.
                     </p>
                   </div>
@@ -127,33 +128,33 @@ const Footer: React.FC = () => {
               </div>
 
               {/* Center: Refined Animation */}
-              <div className="lg:col-span-2 flex justify-center py-10 lg:py-0">
+              <div className="lg:col-span-2 flex justify-center py-6 lg:py-0">
                   <button 
                     className="relative group cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500 focus-visible:ring-offset-4 focus-visible:ring-offset-slate-900 rounded-full" 
                     onClick={() => navigate('#/')}
                     aria-label="Return to Home"
                   >
                     {/* Subtle glow behind */}
-                    <div className="absolute inset-0 bg-brand-500/20 blur-[60px] rounded-full"></div>
+                    <div className="absolute inset-0 bg-brand-500/20 blur-[40px] md:blur-[60px] rounded-full"></div>
                     
                     {/* Ripple Rings */}
-                    <div className="absolute inset-0 border border-white/5 rounded-full scale-[1.8] animate-[ping_3s_ease-in-out_infinite] opacity-20"></div>
-                    <div className="absolute inset-0 border border-white/10 rounded-full scale-[1.4] animate-[pulse_4s_ease-in-out_infinite]"></div>
+                    <div className="absolute inset-0 border border-white/5 rounded-full scale-[1.5] md:scale-[1.8] animate-[ping_3s_ease-in-out_infinite] opacity-20"></div>
+                    <div className="absolute inset-0 border border-white/10 rounded-full scale-[1.2] md:scale-[1.4] animate-[pulse_4s_ease-in-out_infinite]"></div>
                     
                     {/* Main Circle */}
-                    <div className="w-32 h-32 bg-[#0a2215] border border-white/10 rounded-full flex items-center justify-center relative z-10 shadow-2xl transition-transform duration-500 group-hover:scale-105">
-                      <Logo className="h-16 w-16" variant="white" showText={false} />
+                    <div className="w-24 h-24 md:w-32 md:h-32 bg-[#0a2215] border border-white/10 rounded-full flex items-center justify-center relative z-10 shadow-2xl transition-transform duration-500 group-hover:scale-105">
+                      <Logo className="h-12 w-12 md:h-16 md:w-16" variant="white" showText={false} />
                     </div>
                   </button>
               </div>
 
               {/* Right: Contact (Static Text) */}
-              <div className="lg:col-span-5 text-center lg:text-right space-y-8">
+              <div className="lg:col-span-5 text-center lg:text-right space-y-6 lg:space-y-8">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-widest text-brand-400 mb-2">Get in touch</p>
                     <div className="space-y-1">
-                      <p className="text-2xl font-bold text-white tracking-tight">hello@evowell.com</p>
-                      <p className="text-xl font-medium text-white/70 tracking-tight">+1 (310) 555 33 33</p>
+                      <p className="text-xl md:text-2xl font-bold text-white tracking-tight">hello@evowell.com</p>
+                      <p className="text-lg md:text-xl font-medium text-white/70 tracking-tight">+1 (310) 555 33 33</p>
                     </div>
                   </div>
                   
@@ -166,10 +167,10 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Bottom Bar */}
-            <div className="mt-24 pt-8 border-t border-white/10 flex flex-col-reverse md:flex-row justify-between items-center gap-8">
+            <div className="mt-16 md:mt-24 pt-8 border-t border-white/10 flex flex-col-reverse md:flex-row justify-between items-center gap-8">
               
-              <div className="flex gap-8 text-xs font-bold text-white/60 uppercase tracking-widest">
-                  <p>© 2026 EvoWell Inc.</p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 md:gap-8 text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest">
+                  <p className="w-full md:w-auto text-center md:text-left mb-2 md:mb-0">© 2026 EvoWell Inc.</p>
                   <Link href="#/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
                   <Link href="#/terms" className="hover:text-white transition-colors">Terms of Service</Link>
                   <Link href="#/investors" className="hover:text-white transition-colors">Investors</Link>

@@ -76,23 +76,23 @@ const PageHero: React.FC<PageHeroProps> = ({
   );
 
   return (
-    <section className={`relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden ${bgStyles} ${className}`}>
+    <section className={`relative ${designSystem.spacing.hero.top} ${designSystem.spacing.hero.bottom} overflow-hidden ${bgStyles} ${className}`}>
       {/* Background Decorators */}
       {background !== 'dark' && (
         <>
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-50/50 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-50/40 rounded-full blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-brand-50/50 rounded-full blur-[60px] md:blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-[200px] md:w-[600px] h-[200px] md:h-[600px] bg-blue-50/40 rounded-full blur-[50px] md:blur-[100px] translate-y-1/4 -translate-x-1/4 pointer-events-none"></div>
         </>
       )}
 
       <Container size="full" className="px-6 relative z-10">
         {isSplit ? (
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="order-2 lg:order-1">
               {Content}
             </div>
             {visual && (
-              <div className="order-1 lg:order-2 relative flex justify-center lg:justify-end reveal">
+              <div className="order-1 lg:order-2 relative flex justify-center lg:justify-end reveal transform scale-90 md:scale-100 transition-transform">
                 {visual}
               </div>
             )}

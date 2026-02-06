@@ -16,9 +16,9 @@ const AdminContentReviewTab: React.FC = () => {
   const fetchPending = async () => {
     setLoading(true);
     try {
-      const blogs = await api.getAllBlogs();
+      const response = await api.getAllBlogs({ limit: 100 });
       // Filter for PENDING status
-      setPendingBlogs(blogs.filter(b => b.status === 'PENDING'));
+      setPendingBlogs(response.data.filter(b => b.status === 'PENDING'));
     } catch (e) {
       console.error(e);
     } finally {
