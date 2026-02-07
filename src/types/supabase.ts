@@ -197,6 +197,86 @@ export interface Database {
           created_at?: string
         }
       }
+      resources: {
+        Row: {
+          id: string
+          provider_id: string
+          title: string
+          short_description: string
+          full_description: string
+          type: string
+          categories: string[]
+          languages: string[]
+          access_type: string
+          price: number | null
+          currency: string
+          delivery_type: string
+          external_url: string | null
+          file_url: string | null
+          thumbnail_url: string
+          preview_images: string[]
+          tags: string[]
+          status: string
+          moderation_status: string
+          visibility: string
+          created_at: string
+          updated_at: string
+          downloads: number
+          views: number
+        }
+        Insert: {
+          id?: string
+          provider_id: string
+          title: string
+          short_description: string
+          full_description: string
+          type: string
+          categories: string[]
+          languages: string[]
+          access_type: string
+          price?: number | null
+          currency: string
+          delivery_type: string
+          external_url?: string | null
+          file_url?: string | null
+          thumbnail_url: string
+          preview_images?: string[]
+          tags?: string[]
+          status: string
+          moderation_status: string
+          visibility: string
+          created_at?: string
+          updated_at?: string
+          downloads?: number
+          views?: number
+        }
+        Update: {
+          id?: string
+          provider_id?: string
+          title?: string
+          short_description?: string
+          full_description?: string
+          type?: string
+          categories?: string[]
+          languages?: string[]
+          access_type?: string
+          price?: number | null
+          currency?: string
+          delivery_type?: string
+          external_url?: string | null
+          file_url?: string | null
+          thumbnail_url?: string
+          preview_images?: string[]
+          tags?: string[]
+          status?: string
+          moderation_status?: string
+          visibility?: string
+          created_at?: string
+          updated_at?: string
+          downloads?: number
+          views?: number
+        }
+      }
     }
     Views: {
       [_ in never]: never

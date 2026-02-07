@@ -23,6 +23,8 @@ const DirectoryView = lazy(() => import('./views/DirectoryView'));
 const MapSearchView = lazy(() => import('./views/MapSearchView'));
 const ProviderProfileEditView = lazy(() => import('./views/ProviderProfileEditView'));
 const ProviderOnboardingView = lazy(() => import('./views/ProviderOnboardingView'));
+const ExchangeView = lazy(() => import('./views/ExchangeView'));
+const ResourceDetailView = lazy(() => import('./views/ResourceDetailView'));
 const AdminDashboard = lazy(() => import('./views/AdminDashboard'));
 import ClientLayout from './layouts/ClientLayout';
 import ProviderLayout from './layouts/ProviderLayout';
@@ -364,6 +366,10 @@ const AppInner: React.FC = () => {
                       <Route path="/partners" element={<PartnersHubView />} />
                       <Route path="/benefits" element={<BenefitsView />} />
                       <Route path="/calculator" element={<PricingCalculatorView />} />
+
+                      {/* Provider Exchange - Public */}
+                      <Route path="/exchange" element={<ExchangeView />} />
+                      <Route path="/exchange/:slugOrId" element={<WrapperResourceDetails />} />
                       
                       <Route path="/blog" element={<BlogListView />} />
                       <Route path="/blog/:slug" element={<WrapperBlogDetails />} />
@@ -379,7 +385,7 @@ const AppInner: React.FC = () => {
                       <Route path="/terms" element={<LegalView type="terms" />} />
                       <Route path="/privacy" element={<LegalView type="privacy" />} />
                       
-                      <Route path="/provider/:providerId" element={<WrapperProviderProfile />} />
+                      <Route path="/provider/:slugOrId" element={<WrapperProviderProfile />} />
                     </Route>
 
                     {/* Auth - Standalone */}
@@ -443,6 +449,11 @@ const WrapperBlogDetails = () => {
 const WrapperJobDetails = () => {
   const params = useLocation().pathname.split('/').pop() || '';
   return <JobDetailView jobId={params} />;
+};
+
+const WrapperResourceDetails = () => {
+  const params = useLocation().pathname.split('/').pop() || '';
+  return <ResourceDetailView resourceId={params} />;
 };
 
 const WrapperProviderProfile = () => {

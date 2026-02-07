@@ -9,6 +9,7 @@ import BookingSidebar from '../components/provider/booking/BookingSidebar';
 import { Heading, Text, Label } from '../components/typography';
 import { Card, Badge } from '../components/ui';
 import { useQuery } from '@tanstack/react-query';
+import SEO from '../components/SEO';
 
 const DynamicMap = lazy(() => import('../components/maps/DynamicMap'));
 
@@ -307,6 +308,14 @@ const ProviderProfileView: React.FC<{ providerId?: string }> = ({ providerId: pr
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen pb-32">
+      {provider && (
+        <SEO 
+          title={`Dr. ${provider.firstName} ${provider.lastName}`}
+          description={provider.tagline || provider.bio}
+          image={provider.imageUrl}
+          url={`/provider/${provider.profileSlug || provider.id}`}
+        />
+      )}
       {/* Hero Background */}
       <div className="h-[300px] bg-slate-900 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
@@ -317,7 +326,7 @@ const ProviderProfileView: React.FC<{ providerId?: string }> = ({ providerId: pr
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* ── Main Content ─────────────────────────────────── */}
           <div className="flex-grow w-full lg:w-0 min-w-0">
-            <IdentityCard provider={provider} />
+            {provider && <IdentityCard provider={provider} />}
 
             {/* Tab Navigation */}
             <nav className="sticky top-20 z-30 bg-[#F8FAFC] pt-2 pb-4 mb-4" aria-label="Profile sections">

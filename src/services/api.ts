@@ -11,10 +11,11 @@ import { authService } from './auth.service';
 import { providerService } from './provider.service';
 import { clientService } from './client.service';
 import { contentService } from './content.service';
+import { resourceService } from './resource.service';
 import { mockStore } from './mockStore';
 
 // Re-export services for direct usage
-export { authService, providerService, clientService, contentService, mockStore };
+export { authService, providerService, clientService, contentService, resourceService, mockStore };
 
 class ApiService {
   private audit = auditService;
@@ -93,6 +94,17 @@ class ApiService {
   createJob(job: Partial<JobPosting>) { return contentService.createJob(job); }
   deleteJob(id: string) { return contentService.deleteJob(id); }
   getTickets(userId?: string) { return contentService.getTickets(userId); }
+
+  // Resource Service Delegates
+  getAllResources() { return resourceService.getAllResources(); }
+  getResourceById(id: string) { return resourceService.getResourceById(id); }
+  fetchResourceBySlugOrId(id: string) { return resourceService.fetchResourceBySlugOrId(id); }
+  getResourcesByProvider(providerId: string) { return resourceService.getResourcesByProvider(providerId); }
+  createResource(resource: any) { return resourceService.createResource(resource); }
+  updateResource(id: string, updates: any) { return resourceService.updateResource(id, updates); }
+  deleteResource(id: string) { return resourceService.deleteResource(id); }
+  searchResources(filters: any) { return resourceService.searchResources(filters); }
+  moderateResource(id: string, status: any) { return resourceService.moderateResource(id, status); }
 
   // Misc
   async seedDatabase() {}

@@ -10,6 +10,7 @@ import TestimonialsSection from '../components/home/TestimonialsSection';
 import { PageHero, Section, Container, Grid } from '../components/layout';
 import { Heading, Text, Label } from '../components/typography';
 import { Button, Card, CardHeader, CardBody, Badge } from '../components/ui';
+import SEO from '../components/SEO';
 
 interface FeaturedProvider extends ProviderProfile {
   firstName: string;
@@ -225,6 +226,10 @@ const HomeView: React.FC<{ specialties: Specialty[] }> = ({ specialties }) => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans">
+      <SEO 
+        title="EvoWell | The Sovereign Practice OS"
+        description="The next evolution in clinical care. A trusted network of verified experts for patients, and a complete operating system for providers."
+      />
 
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <PageHero

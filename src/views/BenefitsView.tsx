@@ -173,6 +173,81 @@ const BenefitsView: React.FC = () => {
 
       <PointSolutionsReplacement />
 
+      {/* ── Provider Exchange Showcase ──────────────────────────── */}
+      <Section spacing="lg" className="bg-slate-900 text-white overflow-hidden relative">
+         <div className="absolute top-0 right-0 w-1/2 h-full bg-brand-500/10 blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+         <div className="absolute bottom-0 left-0 w-1/2 h-full bg-blue-500/10 blur-[120px] translate-y-1/2 -translate-x-1/2"></div>
+         
+         <Container>
+            <div className="grid lg:grid-cols-2 gap-20 items-center reveal">
+               <div>
+                  <Label variant="overline" className="text-brand-400 mb-6">Marketplace for Experts</Label>
+                  <Heading level={2} color="white" className="text-5xl md:text-6xl mb-8 leading-[1.1]">The Provider Exchange: <br/><span className="text-brand-500">Monetize Your Expertise.</span></Heading>
+                  <Text variant="lead" className="text-slate-400 mb-10">
+                     Join the first high-integrity marketplace built specifically for wellness professionals. Share the tools that make your practice unique and earn passive income while helping the community thrive.
+                  </Text>
+                  
+                  <div className="grid sm:grid-cols-2 gap-8 mb-12">
+                     <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-brand-400">
+                           <Icon path={iconPaths.folder} size={20} />
+                        </div>
+                        <Heading level={4} color="white" size="h4">Clinical Templates</Heading>
+                        <Text variant="small" className="text-slate-500">Sell intake forms, assessment tools, and EHR-ready templates.</Text>
+                     </div>
+                     <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-brand-400">
+                           <Icon path={iconPaths.blog} size={20} />
+                        </div>
+                        <Heading level={4} color="white" size="h4">Digital Guides</Heading>
+                        <Text variant="small" className="text-slate-500">Publish e-books, patient handouts, and specialized worksheets.</Text>
+                     </div>
+                     <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-brand-400">
+                           <Icon path={iconPaths.podcast} size={20} />
+                        </div>
+                        <Heading level={4} color="white" size="h4">Audio & Video</Heading>
+                        <Text variant="small" className="text-slate-500">Host guided meditations, breathwork sessions, or video workshops.</Text>
+                     </div>
+                     <div className="space-y-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-brand-400">
+                           <Icon path={iconPaths.star} size={20} />
+                        </div>
+                        <Heading level={4} color="white" size="h4">Full Courses</Heading>
+                        <Text variant="small" className="text-slate-500">Build and sell comprehensive certification courses for other pros.</Text>
+                     </div>
+                  </div>
+
+                  <Button variant="brand" size="lg" onClick={() => navigate('/exchange')}>Explore the Exchange</Button>
+               </div>
+               
+               <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-brand-500/20 to-blue-500/20 rounded-[4rem] blur-3xl scale-110"></div>
+                  <div className="relative bg-white/5 backdrop-blur-3xl border border-white/10 p-4 rounded-[4rem] shadow-2xl overflow-hidden group">
+                     <img 
+                        src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&q=80&w=1200" 
+                        className="w-full h-auto rounded-[3.5rem] opacity-80 group-hover:opacity-100 transition-opacity duration-700" 
+                        alt="Digital Resources" 
+                     />
+                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                     <div className="absolute bottom-12 left-12 right-12">
+                        <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl text-slate-900 shadow-2xl border border-white/50 transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500">
+                           <div className="flex items-center gap-4 mb-4">
+                              <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-black">EC</div>
+                              <div>
+                                 <p className="font-black text-sm uppercase tracking-tighter">Dr. Elena Chen</p>
+                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Top Contributor</p>
+                              </div>
+                           </div>
+                           <p className="text-sm font-medium text-slate-600 italic">"The Provider Exchange allowed me to reach 500+ clinicians with my specialized ADHD toolkit in just two months."</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </Container>
+      </Section>
+
       {/* ── Founder Quote ────────────────────────────────────────── */}
       <Section spacing="md" className="bg-brand-50 relative overflow-hidden">
          <Container className="relative z-10">

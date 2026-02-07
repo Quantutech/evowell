@@ -56,8 +56,8 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, className }) => {
               </div>
           </div>
           <div className="flex gap-3">
-              <Button fullWidth onClick={() => navigate(`#/provider/${provider.id}`)}>Book Appointment</Button>
-              <Button fullWidth variant="secondary" onClick={() => navigate(`#/provider/${provider.id}`)}>View Profile</Button>
+              <Button fullWidth onClick={() => navigate(`#/provider/${provider.profileSlug || provider.id}`)}>Book Appointment</Button>
+              <Button fullWidth variant="secondary" onClick={() => navigate(`#/provider/${provider.profileSlug || provider.id}`)}>View Profile</Button>
           </div>
         </CardBody>
       </div>

@@ -7,6 +7,7 @@ import { sanitizeHTML } from '../utils/content-sanitizer';
 import { Section, Container } from '../components/layout';
 import { Heading, Text, Label } from '../components/typography';
 import { Button, Card, Badge, Tag } from '../components/ui';
+import SEO from '../components/SEO';
 
 /* ─── Reading progress bar ───────────────────────────────────────────── */
 
@@ -160,6 +161,13 @@ const BlogDetailsView: React.FC<{ slug: string }> = ({ slug }) => {
 
   return (
     <div className="bg-white min-h-screen">
+      <SEO 
+        title={blog.title}
+        description={blog.summary}
+        image={blog.imageUrl}
+        type="article"
+        url={`/blog/${blog.slug}`}
+      />
       <ReadingProgressBar />
       <Breadcrumb items={[{ label: 'Blog', href: '#/blog' }, { label: blog.category || 'Article' }]} />
 

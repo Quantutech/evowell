@@ -16,6 +16,7 @@ import ProviderSupport from '@/components/dashboard/tabs/ProviderSupport';
 import ProviderPatients from '@/components/dashboard/tabs/ProviderPatients';
 import ProviderDocuments from '@/components/dashboard/tabs/ProviderDocuments';
 import ProviderAvailability from '@/components/dashboard/tabs/ProviderAvailability';
+import ProviderResourcesTab from '@/components/dashboard/tabs/ProviderResourcesTab';
 import { ProviderSubscriptionTab } from '@/components/dashboard/tabs/ProviderSubscriptionTab';
 import { SubscriptionTier } from '@/types';
 
@@ -207,6 +208,9 @@ const ProviderLayout: React.FC = () => {
           onSave={handleSaveProfile}
         />
       )}
+      
+      {activeTab === 'resources' && <ProviderResourcesTab />}
+
       {activeTab === 'documents' && <ProviderDocuments />}
       
       {activeTab === 'financials' && (

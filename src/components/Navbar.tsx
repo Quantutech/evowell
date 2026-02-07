@@ -35,8 +35,8 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
   const navbarRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<any>(null);
 
-  // Determine if we are on a page with a dark header (Provider Profile)
-  const isDarkHeaderPage = currentPath.startsWith('#/provider/');
+  // Determine if we are on a page with a dark header (Provider Profile, Exchange)
+  const isDarkHeaderPage = currentPath.startsWith('#/provider/') || currentPath.startsWith('#/exchange');
   // Active Dark Mode is true only when on a dark page AND not scrolled (transparent background)
   const isDarkMode = isDarkHeaderPage && !scrolled;
 
@@ -161,6 +161,7 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
       items: [
         { label: 'For Partners', href: '#/partners', icon: 'partners', desc: 'B2B & strategic alliances' },
         { label: 'For Investors', href: '#/investors', icon: 'star', desc: 'Investment thesis & strategy' },
+        { label: 'Provider Exchange', href: '#/exchange', icon: 'folder', desc: 'Tools & digital resources' },
       ],
     },
     {
@@ -444,7 +445,7 @@ const Navbar: React.FC<{ currentPath: string }> = ({ currentPath }) => {
             />
             
             {/* Menu panel */}
-            <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
+            <div className="absolute inset-y-0 right-0 w-full max-sm bg-white shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300">
               <div className="h-full flex flex-col">
                 <div className="flex justify-between items-center p-6 border-b border-slate-100">
                   <Logo variant="color" className="h-8" />

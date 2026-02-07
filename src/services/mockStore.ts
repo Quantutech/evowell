@@ -1,5 +1,4 @@
-import { User, ProviderProfile, ClientProfile } from '../data/types';
-import { UserRole } from '../data/types/enums';
+import { User, ProviderProfile, ClientProfile, Resource, UserRole } from '../types';
 import { persistence } from './persistence';
 import { loadInitialData } from '../data/utils/loader';
 
@@ -10,6 +9,8 @@ interface MockStoreData {
   specialties: any[];
   testimonials: any[];
   clientProfiles: ClientProfile[];
+  resources: Resource[];
+  hiddenResourceIds: string[];
   languages: string[];
   genders: string[];
   lastUpdated?: number;
@@ -32,6 +33,8 @@ class MockStoreService {
     const store: MockStoreData = {
       ...initialData,
       clientProfiles: stored.clientProfiles || [],
+      resources: (stored as any).resources || [],
+      hiddenResourceIds: (stored as any).hiddenResourceIds || [],
       languages: stored.languages || ['English', 'Spanish', 'Mandarin', 'French', 'German'],
       genders: stored.genders || ['Male', 'Female', 'Non-Binary', 'Prefer not to say']
     };

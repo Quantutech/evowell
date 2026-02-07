@@ -105,7 +105,7 @@ const FeaturedProviders: React.FC<{ providers: FeaturedProvider[] }> = ({ provid
           {tripledProviders.map((p, idx) => (
             <div 
               key={`${p.id}-${idx}`} 
-              onClick={() => navigate(`#/provider/${p.id}`)}
+              onClick={() => navigate(`#/provider/${p.profileSlug || p.id}`)}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
               className="relative min-w-[280px] md:min-w-[320px] h-[400px] md:h-[450px] bg-white rounded-3xl overflow-hidden cursor-pointer group shadow-xl hover:shadow-2xl border border-slate-100 hover:border-brand-100 transition-all duration-500 hover:-translate-y-2"
