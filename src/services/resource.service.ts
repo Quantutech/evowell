@@ -1,5 +1,5 @@
 import { Resource, SearchFilters, ResourceModerationStatus, ModerationStatus } from '../types';
-import { SEED_DATA } from './seedData';
+import { SEED_DATA } from '../data/seed';
 import { mockStore } from './mockStore';
 import { handleRequest } from './serviceUtils';
 import { supabase, isConfigured } from './supabase';

@@ -1,7 +1,7 @@
 import { User, ProviderProfile, UserRole, AuditActionType, AuditResourceType, ClientProfile } from '../types';
 import { supabase, isConfigured } from './supabase';
 import { mockStore } from './mockStore';
-import { SEED_DATA } from './seedData';
+import { SEED_DATA } from '../data/seed';
 import { auditService } from './audit';
 import { errorHandler, AppError, ErrorSeverity } from './error-handler';
 import { handleRequest } from './serviceUtils';

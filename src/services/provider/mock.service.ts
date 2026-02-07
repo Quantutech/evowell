@@ -1,0 +1,175 @@
+import { 
+  ProviderProfile, SearchFilters, Specialty, InsuranceCompany, 
+  SubscriptionTier, SubscriptionStatus, ModerationStatus, UserRole
+} from '../../types';
+import { mockStore } from '../mockStore';
+import { SEED_DATA } from '../../data/seed';
+import { handleRequest } from '../serviceUtils';
+import { AppError } from '../error-handler';
+import { IProviderService } from '../provider.service';
+import { createBlankProviderProfile, generateProfileSlug } from './provider.profile';
+import { fallbackMockSearch } from './provider.search';
+import { ProviderApi } from './provider.api';
+
+export class MockProviderService implements IProviderService {
+  createBlankProviderProfile = createBlankProviderProfile;
+
+  async search(filters: SearchFilters): Promise<{ providers: ProviderProfile[], total: number }> {
+    return handleRequest(() => fallbackMockSearch(filters), 'search');
+  }
+
+  async getProviderById(id: string): Promise<ProviderProfile | undefined> {
+    return ProviderApi.getById(id);
+  }
+
+  async getProviderByUserId(userId: string): Promise<ProviderProfile | undefined> {
+    return ProviderApi.getByUserId(userId);
+  }
+
+  async updateProvider(id: string, data: Partial<ProviderProfile>): Promise<ProviderProfile> {
+    return handleRequest(async () => {
+        if (data.firstName || data.lastName) {
+            const provider = await this.getProviderById(id);
+            if (provider?.userId) {
+                const userIdx = mockStore.store.users.findIndex(u => u.id === provider.userId);
+                if (userIdx !== -1) {
+                    mockStore.store.users[userIdx] = {
+                        ...mockStore.store.users[userIdx],
+                        firstName: data.firstName || mockStore.store.users[userIdx].firstName,
+                        lastName: data.lastName || mockStore.store.users[userIdx].lastName
+                    };
+                    mockStore.save();
+                }
+            }
+        }
+
+        const tempIdx = mockStore.store.providers.findIndex(p => p.id === id);
+        if (tempIdx !== -1) {
+            mockStore.store.providers[tempIdx] = { ...mockStore.store.providers[tempIdx], ...data };
+            mockStore.save();
+            return mockStore.store.providers[tempIdx];
+        }
+        const seedProvider = SEED_DATA.providers.find(p => p.id === id);
+        if (seedProvider) {
+            const updated = { ...seedProvider, ...data };
+            mockStore.store.providers.push(updated);
+            mockStore.save();
+            return updated;
+        }
+        throw new AppError("Provider not found", "NOT_FOUND");
+    }, 'updateProvider');
+  }
+
+  async getAllProviders(params?: { page?: number, limit?: number }): Promise<{ providers: ProviderProfile[], total: number }> {
+    return handleRequest(async () => {
+        const page = params?.page || 1;
+        const limit = params?.limit || 10;
+        const start = (page - 1) * limit;
+
+        const allProviders = [...SEED_DATA.providers, ...mockStore.store.providers];
+        const users = [...SEED_DATA.users, ...mockStore.store.users];
+        
+        const uniqueProviders = allProviders.filter((p, index, self) => 
+          index === self.findIndex(t => t.id === p.id)
+        );
+
+        const total = uniqueProviders.length;
+        const paged = uniqueProviders.slice(start, start + limit);
+
+        const providers = paged.map(p => {
+          const user = users.find(u => u.id === p.userId);
+          return {
+            ...p,
+            firstName: p.firstName || user?.firstName || 'Unknown',
+            lastName: p.lastName || user?.lastName || 'Provider',
+            email: p.email || user?.email,
+            isPublished: p.isPublished ?? true 
+          };
+        });
+
+        return { providers, total };
+    }, 'getAllProviders');
+  }
+
+  async getProviderBySlug(slug: string): Promise<ProviderProfile | undefined> {
+    const tempProvider = mockStore.store.providers.find(p => p.profileSlug === slug);
+    if (tempProvider) return tempProvider;
+    return SEED_DATA.providers.find(p => p.profileSlug === slug);
+  }
+
+  async fetchProviderBySlugOrId(slugOrId: string): Promise<ProviderProfile | undefined> {
+      if (!slugOrId) return undefined;
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId);
+      const isProviderId = slugOrId.startsWith('prov-');
+      
+      let provider: ProviderProfile | undefined;
+      if (!isUUID && !isProviderId) {
+        provider = await this.getProviderBySlug(slugOrId);
+        if (provider) return provider;
+      }
+      provider = await this.getProviderById(slugOrId);
+      if (provider) return provider;
+      provider = await this.getProviderByUserId(slugOrId);
+      if (provider) return provider;
+      provider = await this.getProviderBySlug(slugOrId);
+      return provider;
+  }
+
+  async moderateProvider(id: string, status: ModerationStatus): Promise<void> {
+      const idx = mockStore.store.providers.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        mockStore.store.providers[idx].moderationStatus = status;
+        if (status === ModerationStatus.APPROVED) {
+            mockStore.store.providers[idx].isPublished = true;
+        }
+        mockStore.save();
+      }
+  }
+
+  async updateProviderSlug(providerId: string, firstName: string, lastName: string, specialty?: string, city?: string): Promise<string> {
+    const newSlug = generateProfileSlug(firstName, lastName, specialty, city);
+    const tempIdx = mockStore.store.providers.findIndex(p => p.id === providerId);
+    if (tempIdx !== -1) {
+      mockStore.store.providers[tempIdx].profileSlug = newSlug;
+      mockStore.save();
+    }
+    return newSlug;
+  }
+
+  async createProvider(profile: ProviderProfile): Promise<void> {
+    mockStore.store.providers.push(profile);
+    mockStore.save();
+  }
+
+  async getAllSpecialties(): Promise<Specialty[]> { return SEED_DATA.specialties; }
+  async createSpecialty(name: string): Promise<void> {}
+  async deleteSpecialty(id: string): Promise<void> {}
+  
+  async getAllInsurance(): Promise<InsuranceCompany[]> { return SEED_DATA.insurance; }
+  async createInsurance(name: string): Promise<void> {}
+  async deleteInsurance(id: string): Promise<void> {}
+
+  async getAllLanguages(): Promise<string[]> { return mockStore.store.languages; }
+  async createLanguage(name: string): Promise<void> {
+      if (!mockStore.store.languages.includes(name)) {
+          mockStore.store.languages.push(name);
+          mockStore.save();
+      }
+  }
+  async deleteLanguage(name: string): Promise<void> {
+      mockStore.store.languages = mockStore.store.languages.filter(l => l !== name);
+      mockStore.save();
+  }
+
+  async getAllGenders(): Promise<string[]> { return mockStore.store.genders; }
+  async createGender(name: string): Promise<void> {
+      if (!mockStore.store.genders.includes(name)) {
+          mockStore.store.genders.push(name);
+          mockStore.save();
+      }
+  }
+  async deleteGender(name: string): Promise<void> {
+      mockStore.store.genders = mockStore.store.genders.filter(g => g !== name);
+      mockStore.save();
+  }
+}

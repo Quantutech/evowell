@@ -14,6 +14,7 @@ import { contentService } from './content.service';
 import { resourceService } from './resource.service';
 import { endorsementService } from './endorsement.service';
 import { mockStore } from './mockStore';
+import { SEED_DATA } from '../data/seed';
 
 // Re-export services for direct usage
 export { authService, providerService, clientService, contentService, resourceService, endorsementService, mockStore };

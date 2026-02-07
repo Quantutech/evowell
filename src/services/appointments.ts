@@ -4,7 +4,7 @@ import { Appointment, AvailabilitySlot, ProviderProfile, Availability } from '..
 import { api } from './api';
 import { startOfDay, endOfDay, addMinutes, isBefore, format, parseISO } from 'date-fns';
 import { formatInTimezone } from '../utils/timezone';
-import { SEED_DATA } from './seedData';
+import { SEED_DATA } from '../data/seed';
 
 class AppointmentService {
   

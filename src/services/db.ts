@@ -1,6 +1,6 @@
 
 import { Message, BlogPost, Testimonial } from '../types';
-import { SEED_DATA } from './seedData';
+import { SEED_DATA } from '../data/seed';
 
 /**
  * @deprecated HYBRID LEGACY ADAPTER

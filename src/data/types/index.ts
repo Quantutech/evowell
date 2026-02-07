@@ -1,4 +1,15 @@
-import { UserRole, SubscriptionTier, SubscriptionStatus, ModerationStatus, AppointmentType, AppointmentStatus, TicketStatus, AuditActionType, AuditResourceType } from './enums';
+import {
+  UserRole,
+  SubscriptionTier,
+  SubscriptionStatus,
+  ModerationStatus,
+  AppointmentType,
+  SessionFormat,
+  AppointmentStatus,
+  TicketStatus,
+  AuditActionType,
+  AuditResourceType
+} from './enums';
 import { z } from 'zod';
 
 export const UserSchema = z.object({
@@ -88,6 +99,7 @@ export interface License {
   verified: boolean;
 }
 
+// Fixed: Correct ServicePackage interface matching the expected schema
 export interface ServicePackage {
   id: string;
   providerId: string;
@@ -176,6 +188,8 @@ export interface ProviderProfile {
     createdAt: string;
     updatedAt: string;
   };
+  averageRating?: number;
+  totalReviews?: number;
   profileSlug?: string;
   pronouns?: string;
   businessAddress?: Address;
@@ -196,9 +210,29 @@ export interface ProviderProfile {
   freeConsultation?: boolean;
   videoUrl?: string;
   headline?: string;
-  rating?: number | string;
-  title?: string;
-  credentials?: string;
+  endorsements?: {
+      evowell: boolean;
+      peerCount: number;
+      items?: Endorsement[]; 
+  };
+}
+
+export interface WellnessEntry {
+  id: string;
+  date: string;
+  mood: number; // 1-5
+  energy: number; // 1-5
+  sleepHours: number;
+  notes?: string;
+}
+
+export interface Habit {
+  id: string;
+  name: string;
+  target: number;
+  current: number;
+  unit: string;
+  color: string;
 }
 
 export interface ClientProfile {
@@ -206,7 +240,16 @@ export interface ClientProfile {
   userId: string;
   intakeStatus: 'PENDING' | 'COMPLETED';
   documents: { type: string; url: string; uploadedAt: string }[];
+  bio?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  pronouns?: string;
+  imageUrl?: string;
+  phoneNumber?: string;
+  address?: Address;
   emergencyContact?: { name: string; phone: string; relation: string };
+  wellnessLog?: WellnessEntry[];
+  habits?: Habit[];
   preferences?: {
     communication: 'email' | 'sms' | 'both';
     language: string;
@@ -249,6 +292,7 @@ export interface Appointment {
   dateTime: string;
   durationMinutes: number;
   status: AppointmentStatus;
+  type?: AppointmentType;
   providerTimezone?: string;
   clientTimezone?: string;
   servicePackageId?: string;
@@ -270,6 +314,29 @@ export interface Appointment {
     professionalTitle: string;
     imageUrl?: string;
   };
+}
+
+export interface AvailabilitySlot {
+  start: Date;
+  end: Date;
+  available: boolean;
+}
+
+export interface SupportTicketResponse {
+  id: string;
+  senderId: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  subject: string;
+  message: string;
+  status: TicketStatus;
+  createdAt: string;
+  responses?: SupportTicketResponse[];
 }
 
 export interface Specialty {
@@ -294,6 +361,8 @@ export interface BlogPost {
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
   isFeatured?: boolean;
   providerId?: string;
+  isAiGenerated?: boolean;
+  moderationFlags?: string[];
 }
 
 export interface InsuranceCompany {
@@ -305,6 +374,38 @@ export interface BlogCategory {
   id: string;
   name: string;
   slug?: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  provider: ProviderProfile | null;
+  token: string | null;
+  login: (email: string, password?: string) => Promise<void>;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+export interface SearchFilters {
+  specialty?: string;
+  query?: string;
+  state?: string;
+  format?: SessionFormat;
+  appointmentTypes?: AppointmentType[];
+  gender?: string;
+  language?: string;
+  maxPrice?: number;
+  agesServed?: string[];
+  day?: string;
+  evowellEndorsedOnly?: boolean;
+  sortBy?: 'relevance' | 'endorsements' | 'price_low' | 'price_high' | 'experience' | 'name_asc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface DailyMetric {
+  date: string;
+  views: number;
+  inquiries: number;
 }
 
 export interface JobPosting {
@@ -328,4 +429,107 @@ export interface Notification {
   link?: string;
   is_read: boolean;
   created_at: string;
+}
+
+export interface ProviderApplication {
+  id: string;
+  user_id: string;
+  professional_title: string;
+  license_number: string;
+  license_state: string;
+  npi?: string;
+  years_experience?: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejection_reason?: string;
+  created_at: string;
+  users?: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+}
+
+export type ResourceType = 'course' | 'template' | 'worksheet' | 'mood_board' | 'toolkit' | 'guide' | 'assessment' | 'audio';
+export type ResourceAccess = 'free' | 'paid';
+export type ResourceVisibility = 'public' | 'providers_only';
+export type ResourceStatus = 'draft' | 'published' | 'archived';
+export type ResourceModerationStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Resource {
+  id: string;
+  providerId: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  fullDescription: string; // Markdown
+  type: ResourceType;
+  categories: string[]; // IDs from detailed category list
+  languages: string[];
+  accessType: ResourceAccess;
+  price?: number;
+  currency: string;
+  deliveryType: 'download' | 'external_link' | 'embedded' | 'notion';
+  externalUrl?: string;
+  fileUrl?: string;
+  thumbnailUrl: string;
+  previewImages: string[];
+  tags: string[];
+  status: ResourceStatus;
+  moderationStatus: ResourceModerationStatus;
+  visibility: ResourceVisibility;
+  createdAt: string;
+  updatedAt: string;
+  downloads: number;
+  views: number;
+  provider?: { // Enriched
+      firstName: string;
+      lastName: string;
+      professionalTitle: string;
+      imageUrl: string;
+      bio?: string;
+      email?: string;
+  }
+}
+
+export type EndorsementType = 'evowell' | 'peer';
+
+export type EndorsementReason =
+  | 'clinical_expertise'
+  | 'professional_collaboration'
+  | 'ethical_practice'
+  | 'strong_outcomes'
+  | 'community_contribution';
+
+export interface Endorsement {
+  id: string;
+  endorsedProviderId: string;
+  endorserUserId: string;
+  endorserRole: 'admin' | 'provider';
+  endorsementType: EndorsementType;
+  reason?: EndorsementReason;
+  createdAt: string;
+  deletedAt?: string;
+  endorser?: { // Enriched
+      firstName: string;
+      lastName: string;
+      professionalTitle?: string;
+      imageUrl?: string;
+      profileSlug?: string;
+  }
+}
+
+export interface WishlistEntry {
+  id: string;
+  providerId: string;
+  clientId: string;
+  createdAt: string;
+  provider?: ProviderProfile;
+  client?: {
+    id: string;
+    userId: string;
+    firstName: string;
+    lastName: string;
+    imageUrl?: string;
+    location?: string;
+  };
 }

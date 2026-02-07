@@ -1,6 +1,6 @@
 import { BlogPost, Testimonial, JobPosting, SupportTicket, BlogCategory } from '../types';
 import { db } from './db';
-import { SEED_DATA } from './seedData';
+import { SEED_DATA } from '../data/seed';
 import { isConfigured } from './supabase';
 import { handleRequest } from './serviceUtils';
 

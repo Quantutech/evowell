@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { User, ProviderProfile, UserRole } from '../../../../types';
 import { adminService } from '../../../../services/admin';
-import Pagination from '../../../ui/Pagination';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '../../../ui/Skeleton';
+import { AdminTableLayout } from './AdminTableLayout';
 
 interface AdminUsersTabProps {
-  // Removed static props as we fetch internally now
   onSelectUser: (user: User, provider?: ProviderProfile) => void;
 }
 
@@ -51,10 +50,8 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ onSelectUser }) => {
     }
   };
 
-  return (
-    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 flex flex-col">
-      {/* Filters */}
-      <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+  const header = (
+    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
         <h3 className="text-lg font-black text-slate-900">User Directory</h3>
         <div className="relative">
           <input 
@@ -66,9 +63,17 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ onSelectUser }) => {
           />
           <svg className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </div>
-      </div>
+    </div>
+  );
 
-      <div className="overflow-x-auto min-h-[400px]">
+  return (
+    <AdminTableLayout
+        header={header}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        isLoading={isLoading}
+    >
         <table className="w-full text-left whitespace-nowrap">
            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
@@ -80,7 +85,6 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ onSelectUser }) => {
            </thead>
            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-                // Skeleton Rows
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     <td className="px-8 py-5"><Skeleton className="h-4 w-32 mb-2" /><Skeleton className="h-3 w-24" /></td>
@@ -134,17 +138,7 @@ const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ onSelectUser }) => {
               )}
            </tbody>
         </table>
-      </div>
-
-      <div className="p-6 border-t border-slate-100 bg-slate-50/30">
-        <Pagination 
-          currentPage={page} 
-          totalPages={totalPages} 
-          onPageChange={setPage} 
-          isLoading={isLoading}
-        />
-      </div>
-    </div>
+    </AdminTableLayout>
   );
 };
 

@@ -4,6 +4,7 @@ import { Button, Card, Badge } from '@/components/ui';
 import { Heading, Text, Label } from '@/components/typography';
 import { supabase, isConfigured } from '@/services/supabase';
 import { useAuth } from '@/App';
+import { PlanCard } from '@/components/pricing/PlanCard';
 
 interface ProviderSubscriptionTabProps {
   provider: ProviderProfile;
@@ -267,57 +268,22 @@ export const ProviderSubscriptionTab: React.FC<ProviderSubscriptionTabProps> = (
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {PACKAGES.map(pkg => {
-            const isCurrent = pkg.id === provider.subscriptionTier;
-            return (
-              <div 
-                key={pkg.id} 
-                className={`relative rounded-[2rem] p-8 border transition-all duration-300 flex flex-col ${
-                  isCurrent 
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-xl scale-[1.02]' 
-                    : pkg.popular 
-                      ? 'bg-white border-brand-200 ring-4 ring-brand-50 shadow-lg' 
-                      : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
-                }`}
-              >
-                {pkg.popular && !isCurrent && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm">
-                    Most Popular
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <h3 className={`text-lg font-black mb-2 ${isCurrent ? 'text-white' : 'text-slate-900'}`}>{pkg.name}</h3>
-                  <p className={`text-sm ${isCurrent ? 'text-slate-400' : 'text-slate-500'}`}>{pkg.description}</p>
-                </div>
-
-                <div className="mb-8">
-                  <span className={`text-4xl font-black ${isCurrent ? 'text-white' : 'text-slate-900'}`}>${pkg.price}</span>
-                  <span className={`text-sm font-medium ${isCurrent ? 'text-slate-500' : 'text-slate-400'}`}>/month</span>
-                </div>
-
-                <div className="space-y-4 mb-8 flex-grow">
-                  {pkg.features.map((feature, i) => (
-                    <div key={i} className="flex gap-3 text-sm">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${isCurrent ? 'bg-slate-800 text-brand-400' : 'bg-brand-50 text-brand-600'}`}>
-                        ✓
-                      </div>
-                      <span className={isCurrent ? 'text-slate-300' : 'text-slate-600'}>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Button 
-                  variant={isCurrent ? 'secondary' : pkg.id === SubscriptionTier.PROFESSIONAL ? 'brand' : 'primary'}
-                  className={`w-full ${isCurrent ? 'bg-slate-800 text-white border-none hover:bg-slate-700' : ''}`}
-                  disabled={isCurrent || loadingTier !== null}
-                  onClick={() => handleSelectPlan(pkg.id)}
-                >
-                  {isCurrent ? 'Current Plan' : loadingTier === pkg.id ? 'Processing...' : 'Upgrade'}
-                </Button>
-              </div>
-            );
-          })}
+          {PACKAGES.map(pkg => (
+            <PlanCard
+              key={pkg.id}
+              pkg={{
+                ...pkg,
+                tagline: pkg.description,
+                monthlyPrice: pkg.price,
+                annualPrice: pkg.price * 10, // Mock annual price
+                highlight: pkg.popular
+              }}
+              currentTier={provider.subscriptionTier}
+              billingCycle="monthly"
+              onSelect={handleSelectPlan}
+              loadingTier={loadingTier}
+            />
+          ))}
         </div>
       </div>
 

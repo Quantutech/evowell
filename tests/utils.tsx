@@ -2,7 +2,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { User, UserRole, ProviderProfile } from '../types';
+import { User, UserRole, ProviderProfile } from '../src/types';
 
 // Mock Auth Context - we create a mock context to wrap components
 // Since we don't export the Context object itself from App.tsx, we might need to mock the hook `useAuth` 

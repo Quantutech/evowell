@@ -1,7 +1,7 @@
 import { User, ClientProfile, Appointment, Conversation, Message, UserRole, AuditActionType, AuditResourceType, AppointmentStatus } from '../types';
 import { supabase, isConfigured } from './supabase';
 import { mockStore } from './mockStore';
-import { SEED_DATA } from './seedData';
+import { SEED_DATA } from '../data/seed';
 import { auditService } from './audit';
 import { errorHandler, AppError } from './error-handler';
 import { handleRequest } from './serviceUtils';
