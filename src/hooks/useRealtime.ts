@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase, isConfigured } from '@/services/supabase';
 import { Message, Notification } from '@/types';
 import { api } from '@/services/api';
@@ -72,7 +72,7 @@ export const useRealtimeNotifications = (userId: string | null) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   
-  const fetchState = async () => {
+  const fetchState = useCallback(async () => {
     if (!userId) return;
     const [list, count] = await Promise.all([
       notificationService.getNotifications(userId, 10),
@@ -80,7 +80,7 @@ export const useRealtimeNotifications = (userId: string | null) => {
     ]);
     setNotifications(list);
     setUnreadCount(count);
-  };
+  }, [userId]);
 
   useEffect(() => {
     if (!userId || !isConfigured) return;
@@ -108,7 +108,7 @@ export const useRealtimeNotifications = (userId: string | null) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, fetchState]);
 
   return { 
     notifications, 

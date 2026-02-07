@@ -196,49 +196,44 @@ const LoginView: React.FC<{ login: (e: string, p?: string) => Promise<void>; ini
   };
 
   const performLoginFlow = async () => {
-    try {
-      const result = await api.login(email, password);
-      
-      if (!result || !result.user) {
-        throw new Error('Login failed - no user data returned');
-      }
-      
-      // Determine redirect path based on role and onboarding status
-      let redirectPath = '/portal';
-      
-      if (result.user.role === UserRole.ADMIN) {
-        redirectPath = '/admin';
-      } else if (result.user.role === UserRole.PROVIDER) {
-        redirectPath = '/console';
-        // Check if provider profile exists and onboarding is complete
-        if (!result.provider || !result.provider.onboardingComplete) {
-          redirectPath = '/onboarding';
-          logger.info('Provider needs onboarding', { 
-            hasProvider: !!result.provider, 
-            onboardingComplete: result.provider?.onboardingComplete 
-          });
-        }
-      }
-
-      // Check if MFA is required
-      const level = await authService.getAssuranceLevel();
-      if (level && level.nextLevel === 'aal2' && level.currentLevel !== 'aal2') {
-        // User has MFA enrolled but hasn't verified this session
-        setPendingRedirect(redirectPath);
-        setShowMfa(true);
-        setLoading(false);
-        return;
-      }
-      
-      // Trigger the App's login to update context
-      await login(email, password);
-      
-      logger.info('Login successful, redirecting', { role: result.user.role, redirectPath });
-      navigate(redirectPath);
-      
-    } catch (err: any) { 
-      throw err; 
+    const result = await api.login(email, password);
+    
+    if (!result || !result.user) {
+      throw new Error('Login failed - no user data returned');
     }
+    
+    // Determine redirect path based on role and onboarding status
+    let redirectPath = '/portal';
+    
+    if (result.user.role === UserRole.ADMIN) {
+      redirectPath = '/admin';
+    } else if (result.user.role === UserRole.PROVIDER) {
+      redirectPath = '/console';
+      // Check if provider profile exists and onboarding is complete
+      if (!result.provider || !result.provider.onboardingComplete) {
+        redirectPath = '/onboarding';
+        logger.info('Provider needs onboarding', { 
+          hasProvider: !!result.provider, 
+          onboardingComplete: result.provider?.onboardingComplete 
+        });
+      }
+    }
+
+    // Check if MFA is required
+    const level = await authService.getAssuranceLevel();
+    if (level && level.nextLevel === 'aal2' && level.currentLevel !== 'aal2') {
+      // User has MFA enrolled but hasn't verified this session
+      setPendingRedirect(redirectPath);
+      setShowMfa(true);
+      setLoading(false);
+      return;
+    }
+    
+    // Trigger the App's login to update context
+    await login(email, password);
+    
+    logger.info('Login successful, redirecting', { role: result.user.role, redirectPath });
+    navigate(redirectPath);
   };
 
   const handleMfaVerify = async (code: string) => {

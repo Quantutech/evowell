@@ -86,7 +86,7 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
     const list = [...rawResults];
     switch (sortBy) {
       case 'rating':
-        list.sort((a, b) => (Number((b as any).rating) || 0) - (Number((a as any).rating) || 0));
+        list.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
         break;
       case 'name-asc':
         list.sort((a, b) => (a.firstName || a.id).localeCompare(b.firstName || b.id));
@@ -106,16 +106,24 @@ const SearchView: React.FC<{ specialties: Specialty[]; initialParams?: URLSearch
   // ── Reveal observer ───────────────────────────────────────
 
   useEffect(() => {
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(
-        entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-        { threshold: 0.05 },
-      );
-    }
-    const timer = setTimeout(() => {
+    observerRef.current = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.05 },
+    );
+    
+    const observeElements = () => {
       document.querySelectorAll('.reveal').forEach(el => observerRef.current?.observe(el));
-    }, 100);
-    return () => { clearTimeout(timer); observerRef.current?.disconnect(); };
+    };
+
+    observeElements();
+    
+    // Also re-observe after a short delay to catch late renders
+    const timer = setTimeout(observeElements, 500);
+
+    return () => { 
+      clearTimeout(timer); 
+      observerRef.current?.disconnect(); 
+    };
   }, [results]);
 
   // ── Helper to update a filter ─────────────────────────────

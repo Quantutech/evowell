@@ -33,7 +33,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({
     if (!editForm.timezone) {
       updateField('timezone', getUserTimezone());
     }
-  }, []);
+  }, [editForm.timezone, updateField]);
 
   const addEducation = () => {
     if (!newDegree.degree || !newDegree.university) return;

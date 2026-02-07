@@ -86,8 +86,6 @@ const LoginViewWrapper: React.FC<{ login: (email: string, password?: string) => 
 // ============================================================
 
 const OnboardingGuard: React.FC<{ user: User | null; provider: ProviderProfile | null }> = ({ user, provider }) => {
-  const { navigate } = useNavigation();
-  
   // Must be logged in
   if (!user) {
     return <Navigate to="/login" replace />;

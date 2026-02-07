@@ -6,12 +6,12 @@ interface ScheduleBuilderProps {
   onChange: (value: Availability) => void;
 }
 
+const DAYS_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ value, onChange }) => {
   const [activeTab, setActiveTab] = useState<'weekly' | 'blocked'>('weekly');
   const [blockDateInput, setBlockDateInput] = useState('');
   
-  const DAYS_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
   // Initialize schedule if empty (legacy data migration)
   useEffect(() => {
     if (!value?.schedule || value.schedule.length === 0) {
@@ -30,7 +30,7 @@ const ScheduleBuilder: React.FC<ScheduleBuilderProps> = ({ value, onChange }) =>
         blockedDates: value.blockedDates || []
       });
     }
-  }, []);
+  }, [value, onChange]);
 
   const updateSchedule = (newSchedule: DaySchedule[]) => {
     // Derive summary fields for search indexing

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AppointmentCard from '../../booking/AppointmentCard';
 import { Appointment, UserRole } from '../../../types';
 import { api } from '../../../services/api';
@@ -15,7 +15,7 @@ const ProviderSchedule: React.FC<ProviderScheduleProps> = ({ apps, onAppointment
   const [loading, setLoading] = useState(!apps);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -26,7 +26,7 @@ const ProviderSchedule: React.FC<ProviderScheduleProps> = ({ apps, onAppointment
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!apps) {
@@ -35,7 +35,7 @@ const ProviderSchedule: React.FC<ProviderScheduleProps> = ({ apps, onAppointment
         setAppointments(apps);
         setLoading(false);
     }
-  }, [user, apps]);
+  }, [user, apps, fetchAppointments]);
 
   const filteredAppointments = appointments.filter(a => 
     statusFilter === 'ALL' || a.status === statusFilter

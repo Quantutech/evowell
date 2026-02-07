@@ -66,11 +66,21 @@ const BlogListView: React.FC = () => {
       entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
       { threshold: 0.05 },
     );
-    const timer = setTimeout(() => {
+    
+    const observeElements = () => {
       document.querySelectorAll('.reveal').forEach(el => observerRef.current?.observe(el));
-    }, 100);
-    return () => { clearTimeout(timer); observerRef.current?.disconnect(); };
-  }, [loading, activeCategory, searchQuery]);
+    };
+
+    observeElements();
+    
+    // Also re-observe after a short delay to catch late renders
+    const timer = setTimeout(observeElements, 500);
+
+    return () => { 
+      clearTimeout(timer); 
+      observerRef.current?.disconnect(); 
+    };
+  }, [loading, activeCategory, searchQuery, blogs]);
 
   // ── Derived data ────────────────────────────────────────────
 

@@ -165,6 +165,38 @@ export interface Database {
           slug?: string
         }
       }
+      ai_audit_logs: {
+        Row: {
+          id: string
+          user_id: string
+          request_type: string
+          prompt_used: string
+          generated_content: string
+          is_flagged: boolean
+          flags: string[]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          request_type: string
+          prompt_used: string
+          generated_content: string
+          is_flagged: boolean
+          flags: string[]
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          request_type?: string
+          prompt_used?: string
+          generated_content?: string
+          is_flagged?: boolean
+          flags?: string[]
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

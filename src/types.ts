@@ -240,6 +240,8 @@ export interface ProviderProfile {
     createdAt: string;
     updatedAt: string;
   };
+  averageRating?: number;
+  totalReviews?: number;
   profileSlug?: string;
   pronouns?: string;
   businessAddress?: Address;

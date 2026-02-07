@@ -81,7 +81,7 @@ class AiService {
       if (error) throw error;
 
       const jsonResponse = JSON.parse(data.text);
-      let content = jsonResponse.content || "";
+      const content = jsonResponse.content || "";
       const title = jsonResponse.title || `Draft: ${topic}`;
 
       // Moderate

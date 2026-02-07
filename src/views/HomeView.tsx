@@ -191,14 +191,28 @@ const HomeView: React.FC<{ specialties: Specialty[] }> = ({ specialties }) => {
     };
 
     fetchData();
+  }, []);
 
+  useEffect(() => {
     observerRef.current = new IntersectionObserver(
       entries => entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); }),
       { threshold: 0.1 },
     );
-    document.querySelectorAll('.reveal').forEach(el => observerRef.current?.observe(el));
-    return () => observerRef.current?.disconnect();
-  }, []);
+    
+    const observeElements = () => {
+      document.querySelectorAll('.reveal').forEach(el => observerRef.current?.observe(el));
+    };
+
+    observeElements();
+    
+    // Also re-observe after a short delay to catch elements rendered after data fetch
+    const timeoutId = setTimeout(observeElements, 1000);
+
+    return () => {
+      observerRef.current?.disconnect();
+      clearTimeout(timeoutId);
+    };
+  }, [featured, blogs, testimonials]);
 
   const areasOfSupport = [
     { name: 'Addiction', img: 'https://images.unsplash.com/photo-1573497620053-ea5300f94f21?auto=format&fit=crop&q=80&w=600', id: 's7' },
